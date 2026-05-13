@@ -1,0 +1,12 @@
+:root {
+  --bg: #020617;
+  --card: rgba(255,255,255,0.05);
+  --border: rgba(255,255,255,0.1);
+  --primary: #06b6d4;
+  --text: #e2e8f0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+}
