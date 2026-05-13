@@ -2,8 +2,11 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
+import { attachTenant, attachBranding } from './middleware/tenantMiddleware.js'
+import errorHandler from './middleware/errorHandler.js'
+import { protect } from './middleware/authMiddleware.js'
 
-// routes
+// Routes
 import routes from './routes/index.js'
 import servicesRoutes from './routes/services.js'
 import staffRoutes from './routes/staffRoutes.js'
@@ -26,11 +29,6 @@ import aiAdvisorRoutes from './routes/aiAdvisorRoutes.js'
 import restockRoutes from './routes/restockRoutes.js'
 import webhookRoutes from './routes/webhookRoutes.js'
 
-// middleware
-import { attachTenant, attachBranding } from './middleware/tenantMiddleware.js'
-import errorHandler from './middleware/errorHandler.js'
-import { protect } from './middleware/authMiddleware.js'
-
 const app = express()
 
 // ========================
@@ -41,45 +39,45 @@ app.use(cors())
 app.use(express.json())
 app.use(morgan('dev'))
 
-// AUTH + TENANT (ORDER MATTERS)
-app.use(protect)
+// ========================
+// PUBLIC ENDPOINTS (BEFORE TENANT MIDDLEWARE)
+// ========================
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() })
+})
+
+// Public auth routes (no tenant required)
+app.use('/api/auth', authRoutes)
+app.use('/api/webhook', paystackWebhookRoutes)
+app.use('/api/webhooks', webhookRoutes)
+
+// ========================
+// TENANT MIDDLEWARE (ONLY APPLIES BELOW)
+// ========================
 app.use(attachTenant)
 app.use(attachBranding)
 
 // ========================
-// ROUTES
+// PROTECTED ROUTES (AUTH + TENANT REQUIRED)
 // ========================
-app.use('/api', routes)
-app.use('/api/analytics', analyticsRoutes)
-app.use('/api/services', servicesRoutes)
-app.use('/api/staff', staffRoutes)
-app.use('/api/orders', orderRoutes)
-app.use('/api/auth', authRoutes)
-app.use('/api/paystack', paystackRoutes)
-app.use('/api/vendor', vendorRoutes)
-app.use('/api/wallet', walletRoutes)
-app.use('/api/transactions', transactionRoutes)
-app.use('/api/deliveries', deliveryRoutes)
-app.use('/api/ai', aiRoutes)
-app.use('/api/billing', billingRoutes)
-app.use('/api/forecast', forecastRoutes)
-app.use('/api/webhook', paystackWebhookRoutes)
-app.use('/api/superadmin', superAdminRoutes)
-app.use('/api/onboarding', onboardingRoutes)
-app.use('/api/audit', auditRoutes)
-app.use('/api/ai-advisor', aiAdvisorRoutes)
-app.use('/api/restock', restockRoutes)
-app.use('/api/webhooks', webhookRoutes)
-
-// ========================
-// HEALTH CHECK
-// ========================
-app.get('/health', (req, res) => {
-  res.json({
-    status: 'OK',
-    timestamp: new Date().toISOString()
-  })
-})
+app.use('/api', protect, routes)
+app.use('/api/analytics', protect, analyticsRoutes)
+app.use('/api/services', protect, servicesRoutes)
+app.use('/api/staff', protect, staffRoutes)
+app.use('/api/orders', protect, orderRoutes)
+app.use('/api/paystack', protect, paystackRoutes)
+app.use('/api/vendor', protect, vendorRoutes)
+app.use('/api/wallet', protect, walletRoutes)
+app.use('/api/transactions', protect, transactionRoutes)
+app.use('/api/deliveries', protect, deliveryRoutes)
+app.use('/api/ai', protect, aiRoutes)
+app.use('/api/billing', protect, billingRoutes)
+app.use('/api/forecast', protect, forecastRoutes)
+app.use('/api/superadmin', protect, superAdminRoutes)
+app.use('/api/onboarding', protect, onboardingRoutes)
+app.use('/api/audit', protect, auditRoutes)
+app.use('/api/ai-advisor', protect, aiAdvisorRoutes)
+app.use('/api/restock', protect, restockRoutes)
 
 // ========================
 // ERROR HANDLER

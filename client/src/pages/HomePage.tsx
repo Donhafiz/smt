@@ -24,7 +24,7 @@ export default function HomePage() {
     const token = localStorage.getItem("token");
     setIsLoggedIn(!!token);
 
-    fetch("http://localhost:5000/health")
+    fetch("/health")  // Proxy will forward to backend
       .then((res) => res.json())
       .then(() => setStatus("online"))
       .catch(() => setStatus("offline"));
