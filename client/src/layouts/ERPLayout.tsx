@@ -1,91 +1,148 @@
-import { Outlet, NavLink } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import Logo from '../components/Logo'
+import { 
+  LayoutDashboard, 
+  BarChart3, 
+  ShoppingCart, 
+  Users, 
+  Wrench, 
+  DollarSign,
+  Package,
+  TrendingUp,
+  LineChart,
+  Lightbulb,
+  UserCheck,
+  Brain,
+  Crown,
+  LogOut,
+  Menu,
+  X,
+  Home,
+  ExternalLink
+} from 'lucide-react'
 
 export default function ERPLayout() {
-
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [open, setOpen] = useState(false)
+
+  const handleLogout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('user')
+    navigate('/login')
+  }
+
+  const navItems = [
+    { to: '/admin', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
+    { to: '/admin/analytics', icon: <BarChart3 size={18} />, label: 'Analytics' },
+    { to: '/admin/orders', icon: <ShoppingCart size={18} />, label: 'Orders' },
+    { to: '/admin/staff', icon: <Users size={18} />, label: 'Staff' },
+    { to: '/admin/services', icon: <Wrench size={18} />, label: 'Services' },
+    { to: '/admin/billing', icon: <DollarSign size={18} />, label: 'Billing' },
+    { to: '/admin/inventory', icon: <Package size={18} />, label: 'Inventory' },
+    { to: '/admin/revenue', icon: <TrendingUp size={18} />, label: 'Revenue AI' },
+    { to: '/admin/sales', icon: <LineChart size={18} />, label: 'Sales Forecast' },
+    { to: '/admin/recommendations', icon: <Lightbulb size={18} />, label: 'AI Recs' },
+    { to: '/admin/customers', icon: <UserCheck size={18} />, label: 'Customers' },
+    { to: '/admin/analyst', icon: <Brain size={18} />, label: 'AI Analyst' },
+    { to: '/admin/superadmin', icon: <Crown size={18} />, label: 'Super Admin' },
+  ]
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
-
       {/* MOBILE MENU BUTTON */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed top-4 left-4 z-50 bg-blue-600 px-3 py-2 rounded md:hidden"
+        className="fixed top-4 left-4 z-50 bg-cyan-500/20 border border-cyan-500/30 px-3 py-2 rounded-lg md:hidden backdrop-blur-sm hover:bg-cyan-500/30 transition-all"
       >
-        ☰
+        {open ? <X size={20} /> : <Menu size={20} />}
       </button>
+
+      {/* OVERLAY */}
+      {open && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
+          onClick={() => setOpen(false)}
+        />
+      )}
 
       {/* SIDEBAR */}
       <div
         className={`
           fixed md:relative z-40
-          h-full w-64 bg-[#0f172a]
-          border-r border-gray-800
+          h-full w-64 bg-[#0f172a]/95
+          border-r border-white/10
           p-5 transition-all duration-300
+          backdrop-blur-xl flex flex-col
 
           ${open ? 'left-0' : '-left-72'}
           md:left-0
         `}
       >
-
-        <h1 className="text-2xl font-bold mb-8">
-          SMT ERP
-        </h1>
-
-        <div className="space-y-4">
-
-          <NavLink to="/admin">
-            Dashboard
-          </NavLink>
-
-          <NavLink to="/admin/analytics">
-            Analytics
-          </NavLink>
-
-          <NavLink to="/admin/orders">
-            Orders
-          </NavLink>
-
-          <NavLink to="/admin/products">
-            Products
-          </NavLink>
-
-          <NavLink to="/admin/staff">
-            Staff
-          </NavLink>
-
-          <NavLink to="/admin/inventory">
-            Inventory
-          </NavLink>
-
-          <NavLink to="/admin/revenue">
-            Revenue AI
-          </NavLink>
-
-          <NavLink to="/admin/sales-forecast">
-            Sales Forecast
-          </NavLink>
-
-          <NavLink to="/admin/recommendations">
-            AI Recommendations
-          </NavLink>
-
-          <NavLink to="/admin/customer-analytics">
-            Customer Analytics
-          </NavLink>
-
+        {/* LOGO */}
+        <div className="mb-6 pb-4 border-b border-white/10">
+          <Logo size="sm" />
+          <div className="flex items-center gap-2 mt-3">
+            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+            <p className="text-xs text-gray-500">
+              {user?.name || 'Admin'}
+            </p>
+          </div>
         </div>
 
+        {/* NAV LINKS */}
+        <nav className="space-y-1 flex-1 overflow-y-auto max-h-[calc(100vh-180px)] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.to === '/admin'}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                  isActive
+                    ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                }`
+              }
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </NavLink>
+          ))}
+        </nav>
+
+        {/* BOTTOM ACTIONS */}
+        <div className="pt-4 border-t border-white/10 space-y-2">
+          {/* Visit Site */}
+          <a
+            href="/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 w-full"
+          >
+            <Home size={18} />
+            <span>Visit Site</span>
+            <ExternalLink size={12} className="ml-auto" />
+          </a>
+
+          {/* Logout */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+        </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 md:ml-64 p-4 md:p-6">
-
+      {/* MAIN CONTENT */}
+      <div className="flex-1 p-4 md:p-6 overflow-auto bg-gradient-to-br from-[#020617] to-[#0a0f1e]">
         <Outlet />
-
       </div>
-
     </div>
   )
 }

@@ -2,16 +2,39 @@ import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema(
   {
-    name: String,
-    email: String,
-    password: String,
+    name: {
+      type: String,
+      required: [true, 'Name is required'],
+      trim: true
+    },
+    email: {
+      type: String,
+      required: [true, 'Email is required'],
+      unique: true,
+      lowercase: true,
+      trim: true
+    },
+    password: {
+      type: String,
+      required: [true, 'Password is required'],
+      minlength: [6, 'Password must be at least 6 characters']
+    },
     role: {
       type: String,
+      enum: ['user', 'admin', 'superadmin', 'vendor', 'driver', 'student', 'staff', 'director'],
       default: 'user'
     },
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Tenant'
+      type: String,
+      default: 'default-tenant'
+    },
+    profileImage: {
+      type: String,
+      default: ''
+    },
+    isActive: {
+      type: Boolean,
+      default: true
     }
   },
   { timestamps: true }

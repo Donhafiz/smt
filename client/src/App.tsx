@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route } from 'react-router-dom'
 
 import { AuthProvider } from './context/AuthContext'
 
@@ -12,6 +12,10 @@ import ContactPage from './pages/ContactPage'
 
 import LoginPage from './pages/LoginPage'
 import RegisterPage from './pages/RegisterPage'
+
+import ShopPage from './pages/ShopPage'
+import CartPage from './pages/CartPage'
+import CheckoutPage from './pages/CheckoutPage'
 
 import PaymentSuccess from './pages/PaymentSuccess'
 
@@ -29,14 +33,12 @@ import DriverDashboard from './pages/driver/DriverDashboard'
 import CompanySignup from './pages/auth/CompanySignup'
 
 import AdminRoutes from './routes/AdminRoutes'
-
-// OPTIONAL PROTECTED ROUTE
 import ProtectedRoute from './components/ProtectedRoute'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
     <AuthProvider>
-
       <Routes>
 
         {/* ========================= */}
@@ -53,32 +55,24 @@ function App() {
           <Route path="staff" element={<StaffPage />} />
           <Route path="contact" element={<ContactPage />} />
 
+          {/* SHOP & CART */}
+          <Route path="shop" element={<ShopPage />} />
+          <Route path="cart" element={<CartPage />} />
+          <Route path="checkout" element={<CheckoutPage />} />
+
           {/* AUTH */}
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
 
           {/* PAYMENTS */}
-          <Route
-            path="payment-success"
-            element={<PaymentSuccess />}
-          />
+          <Route path="payment-success" element={<PaymentSuccess />} />
 
           {/* COMPANY ONBOARDING */}
-          <Route
-            path="company-signup"
-            element={<CompanySignup />}
-          />
+          <Route path="company-signup" element={<CompanySignup />} />
 
           {/* VENDOR SYSTEM */}
-          <Route
-            path="vendor-register"
-            element={<VendorRegisterPage />}
-          />
-
-          <Route
-            path="vendor-login"
-            element={<VendorLoginPage />}
-          />
+          <Route path="vendor-register" element={<VendorRegisterPage />} />
+          <Route path="vendor-login" element={<VendorLoginPage />} />
 
           <Route
             path="vendor-dashboard"
@@ -118,10 +112,7 @@ function App() {
           />
 
           {/* ORDER TRACKING */}
-          <Route
-            path="track-order"
-            element={<TrackOrderPage />}
-          />
+          <Route path="track-order" element={<TrackOrderPage />} />
 
         </Route>
 
@@ -138,15 +129,11 @@ function App() {
         />
 
         {/* ========================= */}
-        {/* FALLBACK */}
+        {/* 404 NOT FOUND */}
         {/* ========================= */}
-        <Route
-          path="*"
-          element={<Navigate to="/" replace />}
-        />
+        <Route path="*" element={<NotFoundPage />} />
 
       </Routes>
-
     </AuthProvider>
   )
 }

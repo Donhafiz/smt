@@ -28,6 +28,9 @@ import auditRoutes from './routes/auditRoutes.js'
 import aiAdvisorRoutes from './routes/aiAdvisorRoutes.js'
 import restockRoutes from './routes/restockRoutes.js'
 import webhookRoutes from './routes/webhookRoutes.js'
+import courseRoutes from './routes/courseRoutes.js'
+import aiRequestRoutes from './routes/aiRequestRoutes.js'
+
 
 const app = express()
 
@@ -78,6 +81,8 @@ app.use('/api/onboarding', protect, onboardingRoutes)
 app.use('/api/audit', protect, auditRoutes)
 app.use('/api/ai-advisor', protect, aiAdvisorRoutes)
 app.use('/api/restock', protect, restockRoutes)
+app.use('/api/courses', protect, courseRoutes)
+app.use('/api/ai-requests', protect, aiRequestRoutes)
 
 // ========================
 // ERROR HANDLER

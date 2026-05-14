@@ -1,72 +1,39 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
+import api from '../lib/axios'
 
 interface CartItem {
-  _id: string
-  name: string
-  price: number
+  product: any
   quantity: number
 }
 
-interface CartContextType {
-  cart: CartItem[]
-  addToCart: (item: CartItem) => void
-  removeFromCart: (id: string) => void
-  clearCart: () => void
-  total: number
-}
+const CartContext = createContext<any>(null)
 
-const CartContext = createContext<CartContextType | null>(null)
+export function CartProvider({ children }: { children: ReactNode }) {
+  const [items, setItems] = useState<CartItem[]>([])
 
-export const CartProvider = ({ children }: any) => {
-  const [cart, setCart] = useState<CartItem[]>([])
-
-  // LOAD FROM STORAGE
-  useEffect(() => {
-    const stored = localStorage.getItem('cart')
-    if (stored) setCart(JSON.parse(stored))
-  }, [])
-
-  // SAVE TO STORAGE
-  useEffect(() => {
-    localStorage.setItem('cart', JSON.stringify(cart))
-  }, [cart])
-
-  const addToCart = (item: CartItem) => {
-    setCart(prev => {
-      const exists = prev.find(p => p._id === item._id)
-
-      if (exists) {
-        return prev.map(p =>
-          p._id === item._id
-            ? { ...p, quantity: p.quantity + 1 }
-            : p
-        )
-      }
-
-      return [...prev, item]
+  const addItem = (product: any) => {
+    setItems(prev => {
+      const existing = prev.find(i => i.product._id === product._id)
+      if (existing) return prev.map(i => i.product._id === product._id ? { ...i, quantity: i.quantity + 1 } : i)
+      return [...prev, { product, quantity: 1 }]
     })
   }
 
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(p => p._id !== id))
+  const removeItem = (productId: string) => {
+    setItems(prev => prev.filter(i => i.product._id !== productId))
   }
 
-  const clearCart = () => {
-    setCart([])
+  const updateQuantity = (productId: string, qty: number) => {
+    setItems(prev => prev.map(i => i.product._id === productId ? { ...i, quantity: Math.max(1, qty) } : i))
   }
 
-  const total = cart.reduce(
-    (sum, item) => sum + item.price * item.quantity,
-    0
-  )
+  const total = items.reduce((sum, i) => sum + i.product.price * i.quantity, 0)
 
   return (
-    <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, clearCart, total }}
-    >
+    <CartContext.Provider value={{ items, addItem, removeItem, updateQuantity, total }}>
       {children}
     </CartContext.Provider>
   )
 }
 
-export const useCart = () => useContext(CartContext)!
+export const useCart = () => useContext(CartContext)
