@@ -5,11 +5,15 @@ const api = axios.create({
 })
 
 api.interceptors.request.use((config) => {
+  // Check for staff token first, then regular token
+  const staffToken = localStorage.getItem('staffToken')
   const token = localStorage.getItem('token')
   const tenantId = localStorage.getItem('tenantId')
 
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`
+  const authToken = staffToken || token
+
+  if (authToken) {
+    config.headers.Authorization = `Bearer ${authToken}`
   }
 
   if (tenantId) {

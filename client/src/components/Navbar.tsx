@@ -7,7 +7,7 @@ import {
   Menu, X, ShoppingCart, ChevronDown, Sparkles,
   Home, Wrench, Store, Users, Info, Phone,
   GraduationCap, Briefcase, Monitor, ShoppingBag,
-  Zap, MessageCircle, Search, Bell, User
+  Zap, MessageCircle, Search, Bell, User, Contact
 } from 'lucide-react'
 
 export default function Navbar() {
@@ -19,7 +19,6 @@ export default function Navbar() {
   const isLoggedIn = !!localStorage.getItem('token')
   const { items } = useCart()
   const location = useLocation()
-  const dropdownRef = useRef<HTMLDivElement>(null)
   const servicesRef = useRef<HTMLDivElement>(null)
 
   // Track scroll for glass effect
@@ -124,7 +123,6 @@ export default function Navbar() {
                         transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                       />
                     )}
-                    {/* Hover glow */}
                     <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500/0 via-cyan-500/5 to-purple-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   </>
                 )}
@@ -175,7 +173,7 @@ export default function Navbar() {
                           }`
                         }
                       >
-                        <div className={`p-2 rounded-lg ${({ isActive }: any) => isActive ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10'} transition-all`}>
+                        <div className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:text-white group-hover:bg-white/10 transition-all">
                           {link.icon}
                         </div>
                         <div>
@@ -226,6 +224,15 @@ export default function Navbar() {
               )}
             </Link>
 
+            {/* Staff Portal Button */}
+            <Link
+              to="/staff-login"
+              className="relative px-4 py-2 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center gap-2 overflow-hidden group bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 hover:border-emerald-400/40"
+            >
+              <Contact size={16} className="text-emerald-400 group-hover:text-emerald-300 transition-colors" />
+              <span className="text-emerald-400 group-hover:text-emerald-300 transition-colors">Staff Portal</span>
+            </Link>
+
             {/* Auth */}
             {isLoggedIn ? (
               <div className="flex items-center gap-2">
@@ -257,6 +264,9 @@ export default function Navbar() {
 
           {/* Mobile Buttons */}
           <div className="flex items-center gap-2 lg:hidden">
+            <Link to="/staff-login" className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+              <Contact size={18} />
+            </Link>
             <Link to="/cart" className="p-2.5 rounded-xl text-gray-400 hover:text-white transition-all relative">
               <ShoppingCart size={18} />
               {cartItemCount > 0 && (
@@ -355,6 +365,18 @@ export default function Navbar() {
                       {link.label}
                     </NavLink>
                   ))}
+                </div>
+
+                {/* Staff Portal - Mobile */}
+                <div className="pt-2">
+                  <Link
+                    to="/staff-login"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                  >
+                    <Contact size={16} />
+                    Staff Portal
+                  </Link>
                 </div>
 
                 {/* Auth */}

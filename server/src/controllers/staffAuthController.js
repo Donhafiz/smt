@@ -1,7 +1,6 @@
 import Staff from '../models/Staff.js'
 import jwt from 'jsonwebtoken'
 
-// Generate JWT
 const generateToken = (staff) => {
   return jwt.sign(
     { id: staff._id, staffId: staff.staffId, type: 'staff' },
@@ -19,28 +18,16 @@ export const staffLogin = async (req, res) => {
       return res.status(400).json({ message: 'Please provide staff ID or email and password' })
     }
 
-    // Find staff by staffId or email
     const query = staffId ? { staffId } : { email }
     const staff = await Staff.findOne(query)
 
-    if (!staff) {
-      return res.status(401).json({ message: 'Invalid credentials' })
-    }
-
-    if (!staff.canLogin) {
-      return res.status(403).json({ message: 'Account not activated. Contact admin.' })
-    }
-
-    if (!staff.isActive) {
-      return res.status(403).json({ message: 'Account deactivated.' })
-    }
+    if (!staff) return res.status(401).json({ message: 'Invalid credentials' })
+    if (!staff.canLogin) return res.status(403).json({ message: 'Account not activated. Contact admin.' })
+    if (!staff.isActive) return res.status(403).json({ message: 'Account deactivated.' })
 
     const isMatch = await staff.comparePassword(password)
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' })
-    }
+    if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' })
 
-    // Update last login
     staff.lastLogin = new Date()
     await staff.save()
 
@@ -50,8 +37,7 @@ export const staffLogin = async (req, res) => {
       staff: {
         id: staff._id,
         staffId: staff.staffId,
-        firstName: staff.firstName,
-        lastName: staff.lastName,
+        name: staff.name,
         email: staff.email,
         role: staff.role,
         department: staff.department,
@@ -59,7 +45,6 @@ export const staffLogin = async (req, res) => {
       },
       token
     })
-
   } catch (err) {
     res.status(500).json({ message: err.message })
   }
@@ -69,9 +54,7 @@ export const staffLogin = async (req, res) => {
 export const getStaffProfile = async (req, res) => {
   try {
     const staff = await Staff.findById(req.user.id).select('-password')
-    if (!staff) {
-      return res.status(404).json({ message: 'Staff not found' })
-    }
+    if (!staff) return res.status(404).json({ message: 'Staff not found' })
     res.json(staff)
   } catch (err) {
     res.status(500).json({ message: err.message })
@@ -81,19 +64,34 @@ export const getStaffProfile = async (req, res) => {
 // Update Staff Profile
 export const updateStaffProfile = async (req, res) => {
   try {
-    const updates = req.body
-    delete updates.password // Don't allow direct password update
-    delete updates.staffId
-    delete updates.canLogin
+    const allowedUpdates = [
+      'name', 'email', 'phone', 'photo', 'bio', 'designation',
+      'employeeType', 'dateOfBirth', 'gender',
+      'address', 'emergencyContact', 'education', 'skills'
+    ]
+
+    const updates = {}
+    allowedUpdates.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updates[field] = req.body[field]
+      }
+    })
+
+    console.log('Updating staff profile:', req.user.id)
+    console.log('Updates:', Object.keys(updates))
 
     const staff = await Staff.findByIdAndUpdate(
       req.user.id,
-      updates,
-      { new: true }
+      { $set: updates },
+      { new: true, runValidators: true }
     ).select('-password')
 
+    if (!staff) return res.status(404).json({ message: 'Staff not found' })
+
+    console.log('Profile updated successfully')
     res.json(staff)
   } catch (err) {
+    console.error('Update profile error:', err)
     res.status(400).json({ message: err.message })
   }
 }
@@ -105,9 +103,7 @@ export const changePassword = async (req, res) => {
     const staff = await Staff.findById(req.user.id)
 
     const isMatch = await staff.comparePassword(currentPassword)
-    if (!isMatch) {
-      return res.status(400).json({ message: 'Current password is incorrect' })
-    }
+    if (!isMatch) return res.status(400).json({ message: 'Current password is incorrect' })
 
     staff.password = newPassword
     await staff.save()

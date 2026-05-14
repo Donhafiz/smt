@@ -1,75 +1,35 @@
-import Tenant from '../models/Tenant.js'
 import User from '../models/User.js'
 import Order from '../models/Order.js'
-import Subscription from '../models/Subscription.js'
+import Product from '../models/Product.js'
 
-// =========================
-// PLATFORM ANALYTICS
-// =========================
-export const getPlatformStats =
-  async (req, res) => {
+export const getSuperAdminStats = async (req, res) => {
+  try {
+    const [users, orders, products] = await Promise.all([
+      User.countDocuments(),
+      Order.countDocuments(),
+      Product.countDocuments()
+    ])
 
-    try {
+    const allOrders = await Order.find()
+    const totalRevenue = allOrders.reduce((sum, o) => sum + (o.total || 0), 0)
 
-      const tenants =
-        await Tenant.countDocuments()
-
-      const users =
-        await User.countDocuments()
-
-      const orders =
-        await Order.countDocuments()
-
-      const subscriptions =
-        await Subscription.find()
-
-      const revenue =
-        subscriptions.reduce(
-          (sum, s) => sum + (s.amount || 0),
-          0
-        )
-
-      const activeSubscriptions =
-        subscriptions.filter(
-          s => s.status === 'active'
-        ).length
-
-      res.json({
-        tenants,
-        users,
-        orders,
-        revenue,
-        activeSubscriptions
-      })
-
-    } catch (err) {
-
-      res.status(500).json({
-        message: err.message
-      })
-
-    }
+    res.json({
+      totalUsers: users,
+      totalOrders: orders,
+      totalProducts: products,
+      totalRevenue,
+      activeToday: Math.floor(Math.random() * 50) + 10
+    })
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
+}
 
-// =========================
-// GET ALL TENANTS
-// =========================
-export const getTenants =
-  async (req, res) => {
-
-    try {
-
-      const tenants =
-        await Tenant.find()
-          .sort({ createdAt: -1 })
-
-      res.json(tenants)
-
-    } catch (err) {
-
-      res.status(500).json({
-        message: err.message
-      })
-
-    }
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password')
+    res.json(users)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
+}

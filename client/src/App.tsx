@@ -51,7 +51,8 @@ import RefundsPage from './pages/RefundsPage'
 import StaffLoginPage from './pages/staff/StaffLoginPage'
 import StaffDashboard from './pages/staff/StaffDashboard'
 import StaffPortalLayout from './layouts/StaffPortalLayout'
-
+import StaffProfilePage from './pages/staff/StaffProfilePage'
+import StaffChangePasswordPage from './pages/staff/StaffChangePasswordPage'
 import AdminRoutes from './routes/AdminRoutes'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage'
@@ -167,6 +168,8 @@ function App() {
           <Route path="/staff-portal" element={<StaffPortalLayout />}>
             <Route index element={<StaffDashboard />} />
             <Route path="dashboard" element={<StaffDashboard />} />
+            <Route path="profile" element={<StaffProfilePage />} />
+            <Route path="change-password" element={<StaffChangePasswordPage />} />
             {/* Add more staff portal routes here */}
           </Route>
 

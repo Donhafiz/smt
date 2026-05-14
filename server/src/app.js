@@ -3,6 +3,7 @@ import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
 import errorHandler from './middleware/errorHandler.js'
+import { protect } from './middleware/authMiddleware.js'
 
 // Routes
 import routes from './routes/index.js'
@@ -32,32 +33,38 @@ import aiChatRoutes from './routes/aiChatRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import staffPortalRoutes from './routes/staffPortalRoutes.js'
 
-// In public routes:
-app.use('/api/staff-portal', staffPortalRoutes)
 const app = express()
 
+// ========================
 // CORE MIDDLEWARE
+// ========================
 app.use(helmet())
 app.use(cors())
-app.use(express.json())
+app.use(express.json({ limit: '50mb' }))
+app.use(express.urlencoded({ limit: '50mb', extended: true }))
 app.use(morgan('dev'))
 
+// ========================
 // PUBLIC ENDPOINTS
+// ========================
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
+// ========================
 // PUBLIC ROUTES (NO AUTH)
+// ========================
 app.use('/api/auth', authRoutes)
 app.use('/api/webhook', paystackWebhookRoutes)
 app.use('/api/webhooks', webhookRoutes)
 app.use('/api/courses', courseRoutes)
 app.use('/api/ai-requests', aiRequestRoutes)
 app.use('/api/ai-chat', aiChatRoutes)
+app.use('/api/staff-portal', staffPortalRoutes)
 
-// PROTECTED ROUTES (AUTH REQUIRED — NO TENANT MIDDLEWARE)
-import { protect } from './middleware/authMiddleware.js'
-
+// ========================
+// PROTECTED ROUTES (AUTH REQUIRED)
+// ========================
 app.use('/api', protect, routes)
 app.use('/api/analytics', protect, analyticsRoutes)
 app.use('/api/services', protect, servicesRoutes)
@@ -78,7 +85,9 @@ app.use('/api/audit', protect, auditRoutes)
 app.use('/api/ai-advisor', protect, aiAdvisorRoutes)
 app.use('/api/restock', protect, restockRoutes)
 
+// ========================
 // ERROR HANDLER
+// ========================
 app.use(errorHandler)
 
 export default app
