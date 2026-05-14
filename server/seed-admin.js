@@ -1,66 +1,40 @@
 import mongoose from 'mongoose'
-import bcrypt from 'bcryptjs'
 import dotenv from 'dotenv'
 dotenv.config()
 
-const seedAdmin = async () => {
-  try {
-    // Connect to MongoDB
-    await mongoose.connect(process.env.MONGO_URI)
-    console.log('✅ MongoDB connected')
+import Product from './src/models/Product.js'
+import Course from './src/models/Course.js'
 
-    // Check if admin already exists
-    const existingAdmin = await mongoose.connection.db
-      .collection('users')
-      .findOne({ email: 'admin@smt.com' })
+const seed = async () => {
+  await mongoose.connect(process.env.MONGO_URI)
+  console.log('✅ MongoDB connected')
 
-    if (existingAdmin) {
-      console.log('⚠️  Admin already exists, updating password...')
-      
-      const hashedPassword = await bcrypt.hash('Admin123!', 10)
-      
-      await mongoose.connection.db.collection('users').updateOne(
-        { email: 'admin@smt.com' },
-        { 
-          $set: { 
-            password: hashedPassword,
-            role: 'admin',
-            isActive: true
-          } 
-        }
-      )
-      
-      console.log('✅ Admin password updated')
-    } else {
-      // Create new admin
-      const hashedPassword = await bcrypt.hash('Admin123!', 10)
-      
-      await mongoose.connection.db.collection('users').insertOne({
-        name: 'Super Admin',
-        email: 'admin@smt.com',
-        password: hashedPassword,
-        role: 'admin',
-        tenantId: 'default-tenant',
-        profileImage: '',
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      })
-      
-      console.log('✅ Admin created')
-    }
+  // Seed Products
+  await Product.deleteMany({})
+  await Product.insertMany([
+    { name: 'MacBook Pro M3', category: 'Laptops', price: 12500, stock: 15, description: 'Apple MacBook Pro with M3 chip', tenantId: 'default-tenant' },
+    { name: 'iPhone 15 Pro', category: 'Phones', price: 8500, stock: 23, description: 'Apple iPhone 15 Pro 256GB', tenantId: 'default-tenant' },
+    { name: 'Sony WH-1000XM5', category: 'Accessories', price: 2200, stock: 40, description: 'Premium noise-canceling headphones', tenantId: 'default-tenant' },
+    { name: 'Samsung Galaxy Watch 6', category: 'Smart Devices', price: 1800, stock: 18, description: 'Smart watch with health tracking', tenantId: 'default-tenant' },
+    { name: 'Dell XPS 15', category: 'Laptops', price: 9800, stock: 10, description: 'Dell XPS 15 laptop', tenantId: 'default-tenant' },
+  ])
+  console.log('✅ Products seeded')
 
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━')
-    console.log('📧 Email:    admin@smt.com')
-    console.log('🔑 Password: Admin123!')
-    console.log('👤 Role:     admin')
-    console.log('━━━━━━━━━━━━━━━━━━━━━━━')
+  // Seed Courses
+  await Course.deleteMany({})
+  await Course.insertMany([
+    { title: 'Web Development Bootcamp', category: 'Web Development', price: 1500, duration: '12 weeks', level: 'Beginner', instructor: 'Mr. Hafiz', description: 'Learn HTML, CSS, JavaScript, and React from scratch.', tenantId: 'default-tenant' },
+    { title: 'Mobile App Development', category: 'Mobile', price: 2000, duration: '10 weeks', level: 'Intermediate', instructor: 'Ms. Ama', description: 'Build iOS and Android apps with Flutter.', tenantId: 'default-tenant' },
+    { title: 'Cybersecurity Essentials', category: 'Cybersecurity', price: 2500, duration: '8 weeks', level: 'Intermediate', instructor: 'Mr. Kwame', description: 'Learn network security, ethical hacking, and defense strategies.', tenantId: 'default-tenant' },
+    { title: 'Data Analysis with Python', category: 'Data Analysis', price: 1800, duration: '10 weeks', level: 'Beginner', instructor: 'Ms. Efua', description: 'Master data analysis using Python, Pandas, and visualization tools.', tenantId: 'default-tenant' },
+  ])
+  console.log('✅ Courses seeded')
 
-    process.exit(0)
-  } catch (error) {
-    console.error('❌ Error:', error.message)
-    process.exit(1)
-  }
+  console.log('🎉 Seed complete!')
+  process.exit(0)
 }
 
-seedAdmin()
+seed().catch(err => {
+  console.error('Seed error:', err)
+  process.exit(1)
+})

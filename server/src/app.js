@@ -30,7 +30,7 @@ import restockRoutes from './routes/restockRoutes.js'
 import webhookRoutes from './routes/webhookRoutes.js'
 import courseRoutes from './routes/courseRoutes.js'
 import aiRequestRoutes from './routes/aiRequestRoutes.js'
-
+import aiChatRoutes from './routes/aiChatRoutes.js'
 
 const app = express()
 
@@ -53,6 +53,11 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes)
 app.use('/api/webhook', paystackWebhookRoutes)
 app.use('/api/webhooks', webhookRoutes)
+
+// Public data routes
+app.use('/api/courses', courseRoutes)       // GET is public
+app.use('/api/ai-requests', aiRequestRoutes) // POST is public
+app.use('/api/ai-chat', aiChatRoutes)       // Chat is public
 
 // ========================
 // TENANT MIDDLEWARE (ONLY APPLIES BELOW)
@@ -81,8 +86,6 @@ app.use('/api/onboarding', protect, onboardingRoutes)
 app.use('/api/audit', protect, auditRoutes)
 app.use('/api/ai-advisor', protect, aiAdvisorRoutes)
 app.use('/api/restock', protect, restockRoutes)
-app.use('/api/courses', protect, courseRoutes)
-app.use('/api/ai-requests', protect, aiRequestRoutes)
 
 // ========================
 // ERROR HANDLER

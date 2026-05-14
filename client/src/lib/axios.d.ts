@@ -1,4 +1,5 @@
 declare module '../lib/axios' {
-  const api: import('axios').AxiosInstance
+  import type { AxiosInstance } from 'axios'
+  const api: AxiosInstance
   export default api
 }

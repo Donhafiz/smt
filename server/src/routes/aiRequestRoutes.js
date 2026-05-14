@@ -3,7 +3,8 @@ import { createRequest, getRequests } from '../controllers/aiRequestController.j
 import { protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
-router.post('/', createRequest)        // Public
-router.get('/', protect, getRequests)  // Admin
+
+router.post('/', createRequest)
+router.get('/', protect, getRequests)
 
 export default router

@@ -1,8 +1,7 @@
 import express from 'express'
-import { aiChat } from '../controllers/aiChatController.js'
+import { chat } from '../controllers/aiChatController.js'
 
 const router = express.Router()
-
-router.post('/chat', aiChat)
+router.post('/', chat)
 
 export default router
