@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Logo from '../components/Logo'
+import AnimatedBackground from '../components/AnimatedBackground'
 import { 
   LayoutDashboard, 
   BarChart3, 
