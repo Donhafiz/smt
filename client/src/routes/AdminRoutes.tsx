@@ -18,7 +18,7 @@ import OrderTracking from '../pages/OrderTracking'
 import InventoryForecast from '../pages/admin/InventoryForecast'
 import ProductsAdmin from '../pages/admin/ProductsAdmin'
 import SoftwarePage from '../pages/SoftwarePage'
-
+import CoursesAdmin from '../pages/admin/CoursesAdmin'
 
 export default function AdminRoutes() {
   return (
@@ -45,6 +45,7 @@ export default function AdminRoutes() {
         <Route path="analyst" element={<AIAnalyst />} />
         <Route path="superadmin" element={<SuperAdminDashboard />} />
         <Route path="products" element={<ProductsAdmin />} />
+        <Route path="courses" element={<CoursesAdmin />} />
         <Route path="software" element={<SoftwarePage />} />
       </Route>
     </Routes>

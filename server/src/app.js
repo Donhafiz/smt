@@ -2,9 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import helmet from 'helmet'
 import morgan from 'morgan'
-import { attachTenant, attachBranding } from './middleware/tenantMiddleware.js'
 import errorHandler from './middleware/errorHandler.js'
-import { protect } from './middleware/authMiddleware.js'
 
 // Routes
 import routes from './routes/index.js'
@@ -31,48 +29,41 @@ import webhookRoutes from './routes/webhookRoutes.js'
 import courseRoutes from './routes/courseRoutes.js'
 import aiRequestRoutes from './routes/aiRequestRoutes.js'
 import aiChatRoutes from './routes/aiChatRoutes.js'
+import productRoutes from './routes/productRoutes.js'
+import staffPortalRoutes from './routes/staffPortalRoutes.js'
 
+// In public routes:
+app.use('/api/staff-portal', staffPortalRoutes)
 const app = express()
 
-// ========================
 // CORE MIDDLEWARE
-// ========================
 app.use(helmet())
 app.use(cors())
 app.use(express.json())
 app.use(morgan('dev'))
 
-// ========================
-// PUBLIC ENDPOINTS (BEFORE TENANT MIDDLEWARE)
-// ========================
+// PUBLIC ENDPOINTS
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
-// Public auth routes (no tenant required)
+// PUBLIC ROUTES (NO AUTH)
 app.use('/api/auth', authRoutes)
 app.use('/api/webhook', paystackWebhookRoutes)
 app.use('/api/webhooks', webhookRoutes)
+app.use('/api/courses', courseRoutes)
+app.use('/api/ai-requests', aiRequestRoutes)
+app.use('/api/ai-chat', aiChatRoutes)
 
-// Public data routes
-app.use('/api/courses', courseRoutes)       // GET is public
-app.use('/api/ai-requests', aiRequestRoutes) // POST is public
-app.use('/api/ai-chat', aiChatRoutes)       // Chat is public
+// PROTECTED ROUTES (AUTH REQUIRED — NO TENANT MIDDLEWARE)
+import { protect } from './middleware/authMiddleware.js'
 
-// ========================
-// TENANT MIDDLEWARE (ONLY APPLIES BELOW)
-// ========================
-app.use(attachTenant)
-app.use(attachBranding)
-
-// ========================
-// PROTECTED ROUTES (AUTH + TENANT REQUIRED)
-// ========================
 app.use('/api', protect, routes)
 app.use('/api/analytics', protect, analyticsRoutes)
 app.use('/api/services', protect, servicesRoutes)
 app.use('/api/staff', protect, staffRoutes)
 app.use('/api/orders', protect, orderRoutes)
+app.use('/api/products', protect, productRoutes)
 app.use('/api/paystack', protect, paystackRoutes)
 app.use('/api/vendor', protect, vendorRoutes)
 app.use('/api/wallet', protect, walletRoutes)
@@ -87,9 +78,7 @@ app.use('/api/audit', protect, auditRoutes)
 app.use('/api/ai-advisor', protect, aiAdvisorRoutes)
 app.use('/api/restock', protect, restockRoutes)
 
-// ========================
 // ERROR HANDLER
-// ========================
 app.use(errorHandler)
 
 export default app

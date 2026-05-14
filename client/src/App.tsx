@@ -47,6 +47,11 @@ import TermsPage from './pages/TermsPage'
 import CookiesPage from './pages/CookiesPage'
 import RefundsPage from './pages/RefundsPage'
 
+// Staff Portal
+import StaffLoginPage from './pages/staff/StaffLoginPage'
+import StaffDashboard from './pages/staff/StaffDashboard'
+import StaffPortalLayout from './layouts/StaffPortalLayout'
+
 import AdminRoutes from './routes/AdminRoutes'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage'
@@ -101,6 +106,9 @@ function App() {
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
 
+            {/* STAFF AUTH */}
+            <Route path="staff-login" element={<StaffLoginPage />} />
+
             {/* PAYMENTS */}
             <Route path="payment-success" element={<PaymentSuccess />} />
 
@@ -151,6 +159,15 @@ function App() {
             {/* ORDER TRACKING */}
             <Route path="track-order" element={<TrackOrderPage />} />
 
+          </Route>
+
+          {/* ========================= */}
+          {/* STAFF PORTAL */}
+          {/* ========================= */}
+          <Route path="/staff-portal" element={<StaffPortalLayout />}>
+            <Route index element={<StaffDashboard />} />
+            <Route path="dashboard" element={<StaffDashboard />} />
+            {/* Add more staff portal routes here */}
           </Route>
 
           {/* ========================= */}

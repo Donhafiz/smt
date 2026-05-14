@@ -4,9 +4,8 @@ import Service from '../models/Service.js'
 export const getServices = async (req, res) => {
   try {
     const services = await Service.find({
-      tenantId: req.tenantId
+      tenantId: req.tenantId || 'default-tenant'
     })
-
     res.json(services)
   } catch (err) {
     res.status(500).json({ message: err.message })
@@ -18,9 +17,8 @@ export const createService = async (req, res) => {
   try {
     const service = await Service.create({
       ...req.body,
-      tenantId: req.tenantId
+      tenantId: req.tenantId || 'default-tenant'
     })
-
     res.status(201).json(service)
   } catch (err) {
     res.status(500).json({ message: err.message })
@@ -31,14 +29,10 @@ export const createService = async (req, res) => {
 export const updateService = async (req, res) => {
   try {
     const service = await Service.findOneAndUpdate(
-      {
-        _id: req.params.id,
-        tenantId: req.tenantId
-      },
+      { _id: req.params.id, tenantId: req.tenantId || 'default-tenant' },
       req.body,
       { new: true }
     )
-
     res.json(service)
   } catch (err) {
     res.status(500).json({ message: err.message })
@@ -50,9 +44,8 @@ export const deleteService = async (req, res) => {
   try {
     await Service.findOneAndDelete({
       _id: req.params.id,
-      tenantId: req.tenantId
+      tenantId: req.tenantId || 'default-tenant'
     })
-
     res.json({ message: 'Deleted' })
   } catch (err) {
     res.status(500).json({ message: err.message })

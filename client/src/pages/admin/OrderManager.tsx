@@ -1,17 +1,11 @@
-import { useEffect, useState } from 'react'
-import axios from 'axios'
+import { useState, useEffect } from 'react'
+import api from '../../lib/axios'
+import { ShoppingCart, Eye, CheckCircle, XCircle, Clock } from 'lucide-react'
 
-interface Order {
-  _id: string
-  customerName: string
-  total: number
-  status: string
-  createdAt: string
-}
-
-export default function OrdersManager() {
-  const [orders, setOrders] = useState<Order[]>([])
+export default function OrderManager() {
+  const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all')
 
   useEffect(() => {
     fetchOrders()
@@ -19,80 +13,81 @@ export default function OrdersManager() {
 
   const fetchOrders = async () => {
     try {
-      const res = await axios.get('/api/orders')
+      const res = await api.get('/orders')
       setOrders(res.data)
     } catch (err) {
-      console.log(err)
+      console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
-  const updateStatus = async (id: string, status: string) => {
-    await axios.put(`/api/orders/${id}`, { status })
-    fetchOrders()
+  const filteredOrders = filter === 'all' 
+    ? orders 
+    : orders.filter(o => o.status === filter)
+
+  const statusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle size={16} className="text-green-400" />
+      case 'pending': return <Clock size={16} className="text-yellow-400" />
+      case 'cancelled': return <XCircle size={16} className="text-red-400" />
+      default: return <Eye size={16} className="text-gray-400" />
+    }
   }
 
-  const deleteOrder = async (id: string) => {
-    await axios.delete(`/api/orders/${id}`)
-    fetchOrders()
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin" />
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6 text-white">
-
-      <h1 className="text-3xl font-bold">Order Management</h1>
-
-      {loading && <p className="text-gray-400">Loading orders...</p>}
-
-      <div className="space-y-4">
-
-        {orders.map(order => (
-          <div key={order._id} className="bg-[#0f172a] p-4 rounded-xl border border-gray-800">
-
-            <div className="flex justify-between">
-              <div>
-                <p className="font-bold">{order.customerName}</p>
-                <p className="text-gray-400 text-sm">
-                  GHS {order.total}
-                </p>
-              </div>
-
-              <span className="text-sm text-blue-400">
-                {order.status}
-              </span>
-            </div>
-
-            <div className="flex gap-2 mt-3">
-
-              <button
-                onClick={() => updateStatus(order._id, 'processing')}
-                className="bg-yellow-500 px-3 py-1 rounded"
-              >
-                Processing
-              </button>
-
-              <button
-                onClick={() => updateStatus(order._id, 'completed')}
-                className="bg-green-600 px-3 py-1 rounded"
-              >
-                Completed
-              </button>
-
-              <button
-                onClick={() => deleteOrder(order._id)}
-                className="bg-red-600 px-3 py-1 rounded"
-              >
-                Delete
-              </button>
-
-            </div>
-
-          </div>
-        ))}
-
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-black bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+          Orders
+        </h1>
+        <div className="flex gap-2">
+          {['all', 'pending', 'completed', 'cancelled'].map(f => (
+            <button
+              key={f}
+              onClick={() => setFilter(f)}
+              className={`px-4 py-2 rounded-lg text-sm capitalize transition-all ${
+                filter === f ? 'bg-cyan-500/20 text-cyan-400' : 'bg-white/5 text-gray-400 hover:text-white'
+              }`}
+            >
+              {f}
+            </button>
+          ))}
+        </div>
       </div>
 
+      {filteredOrders.length === 0 ? (
+        <div className="text-center py-20 text-gray-500">
+          <ShoppingCart size={48} className="mx-auto mb-4 opacity-30" />
+          <p>No orders found</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {filteredOrders.map(order => (
+            <div key={order._id} className="bg-white/5 border border-white/10 rounded-xl p-5 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                {statusIcon(order.status)}
+                <div>
+                  <p className="font-medium">{order.customerName || 'Customer'}</p>
+                  <p className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleDateString()}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <p className="font-bold text-cyan-400">GHS {order.total?.toLocaleString()}</p>
+                <p className="text-xs text-gray-500 capitalize">{order.status}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

@@ -1,116 +1,60 @@
-import { useEffect, useState } from 'react'
-import axios from 'axios'
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  CartesianGrid
-} from 'recharts'
-
-interface Stats {
-  services: number
-  staff: number
-  products: number
-  orders: number
-}
+import { useState, useEffect } from 'react'
+import api from '../../lib/axios'
+import { BarChart3, TrendingUp, ShoppingCart, Users, DollarSign } from 'lucide-react'
 
 export default function AnalyticsDashboard() {
-  const [stats, setStats] = useState<Stats>({
-    services: 0,
-    staff: 0,
-    products: 0,
-    orders: 0
-  })
-
+  const [data, setData] = useState<any>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchStats()
+    api.get('/analytics')
+      .then(res => setData(res.data))
+      .catch(console.error)
+      .finally(() => setLoading(false))
   }, [])
 
-  const fetchStats = async () => {
-    try {
-      const [services, staff, products, orders] = await Promise.all([
-        axios.get('/api/services'),
-        axios.get('/api/staff'),
-        axios.get('/api/products'),
-        axios.get('/api/orders')
-      ])
-
-      setStats({
-        services: services.data.length,
-        staff: staff.data.length,
-        products: products.data.length,
-        orders: orders.data.length
-      })
-    } catch (err) {
-      console.log(err)
-    } finally {
-      setLoading(false)
-    }
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin" />
+      </div>
+    )
   }
 
-  const chartData = [
-    { name: 'Services', value: stats.services },
-    { name: 'Staff', value: stats.staff },
-    { name: 'Products', value: stats.products },
-    { name: 'Orders', value: stats.orders }
+  const metrics = [
+    { label: 'Total Revenue', value: `GHS ${(data?.totalRevenue || 0).toLocaleString()}`, icon: <DollarSign size={24} />, color: 'text-green-400', bg: 'bg-green-500/10' },
+    { label: 'Total Orders', value: data?.totalOrders || 0, icon: <ShoppingCart size={24} />, color: 'text-purple-400', bg: 'bg-purple-500/10' },
+    { label: 'Customers', value: data?.totalCustomers || 0, icon: <Users size={24} />, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
+    { label: 'Products', value: data?.totalProducts || 0, icon: <BarChart3 size={24} />, color: 'text-orange-400', bg: 'bg-orange-500/10' },
   ]
 
   return (
-    <div className="space-y-8 text-white">
+    <div className="space-y-6">
+      <h1 className="text-3xl font-black bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
+        Analytics Overview
+      </h1>
 
-      <div>
-        <h1 className="text-3xl font-bold">Analytics Dashboard</h1>
-        <p className="text-gray-400">System overview & performance</p>
-      </div>
-
-      {loading && <p className="text-gray-400">Loading charts...</p>}
-
-      {/* CARDS */}
-      <div className="grid md:grid-cols-4 gap-4">
-        {chartData.map((item) => (
-          <div key={item.name} className="bg-[#0f172a] p-4 rounded-xl border border-gray-800">
-            <h2 className="text-gray-400">{item.name}</h2>
-            <p className="text-2xl font-bold text-blue-400">{item.value}</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        {metrics.map((m, i) => (
+          <div key={i} className="bg-white/5 border border-white/10 rounded-2xl p-5">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-gray-400 text-sm">{m.label}</span>
+              <div className={`p-2 rounded-lg ${m.bg}`}>
+                <span className={m.color}>{m.icon}</span>
+              </div>
+            </div>
+            <h2 className={`text-2xl font-bold ${m.color}`}>{m.value}</h2>
           </div>
         ))}
       </div>
 
-      {/* BAR CHART */}
-      <div className="bg-[#0f172a] p-6 rounded-xl border border-gray-800">
-        <h2 className="mb-4 font-semibold">System Distribution</h2>
-
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={chartData}>
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="value" fill="#3b82f6" />
-          </BarChart>
-        </ResponsiveContainer>
+      <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
+        <h3 className="text-lg font-semibold mb-4">Revenue Trend</h3>
+        <div className="h-64 flex items-center justify-center text-gray-500">
+          <TrendingUp size={48} className="opacity-30" />
+          <span className="ml-3">Chart will render here with real data</span>
+        </div>
       </div>
-
-      {/* LINE CHART */}
-      <div className="bg-[#0f172a] p-6 rounded-xl border border-gray-800">
-        <h2 className="mb-4 font-semibold">Growth Trend</h2>
-
-        <ResponsiveContainer width="100%" height={300}>
-          <LineChart data={chartData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="value" stroke="#22c55e" />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-
     </div>
   )
 }

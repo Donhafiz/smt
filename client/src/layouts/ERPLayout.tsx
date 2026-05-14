@@ -21,7 +21,9 @@ import {
   Menu,
   X,
   Home,
-  ExternalLink
+  ExternalLink,
+  GraduationCap,
+  Sparkles
 } from 'lucide-react'
 
 export default function ERPLayout() {
@@ -38,7 +40,9 @@ export default function ERPLayout() {
   const navItems = [
     { to: '/admin', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
     { to: '/admin/analytics', icon: <BarChart3 size={18} />, label: 'Analytics' },
+    { to: '/admin/products', icon: <Package size={18} />, label: 'Products' },
     { to: '/admin/orders', icon: <ShoppingCart size={18} />, label: 'Orders' },
+    { to: '/admin/courses', icon: <GraduationCap size={18} />, label: 'Courses' },
     { to: '/admin/staff', icon: <Users size={18} />, label: 'Staff' },
     { to: '/admin/services', icon: <Wrench size={18} />, label: 'Services' },
     { to: '/admin/billing', icon: <DollarSign size={18} />, label: 'Billing' },
@@ -52,11 +56,14 @@ export default function ERPLayout() {
   ]
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white flex">
+    <div className="min-h-screen bg-[#020617] text-white flex relative">
+      {/* Animated Background */}
+      <AnimatedBackground />
+
       {/* MOBILE MENU BUTTON */}
       <button
         onClick={() => setOpen(!open)}
-        className="fixed top-4 left-4 z-50 bg-cyan-500/20 border border-cyan-500/30 px-3 py-2 rounded-lg md:hidden backdrop-blur-sm hover:bg-cyan-500/30 transition-all"
+        className="fixed top-4 left-4 z-50 bg-cyan-500/20 border border-cyan-500/30 px-3 py-2 rounded-lg md:hidden backdrop-blur-sm hover:bg-cyan-500/30 transition-all glass"
       >
         {open ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -64,7 +71,7 @@ export default function ERPLayout() {
       {/* OVERLAY */}
       {open && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 md:hidden backdrop-blur-sm"
+          className="fixed inset-0 bg-black/60 z-30 md:hidden backdrop-blur-sm"
           onClick={() => setOpen(false)}
         />
       )}
@@ -73,10 +80,11 @@ export default function ERPLayout() {
       <div
         className={`
           fixed md:relative z-40
-          h-full w-64 bg-[#0f172a]/95
+          h-full w-64 bg-[#0f172a]/80
           border-r border-white/10
           p-5 transition-all duration-300
-          backdrop-blur-xl flex flex-col
+          backdrop-blur-2xl flex flex-col
+          shadow-2xl shadow-black/30
 
           ${open ? 'left-0' : '-left-72'}
           md:left-0
@@ -86,9 +94,16 @@ export default function ERPLayout() {
         <div className="mb-6 pb-4 border-b border-white/10">
           <Logo size="sm" />
           <div className="flex items-center gap-2 mt-3">
-            <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <p className="text-xs text-gray-500">
-              {user?.name || 'Admin'}
+            <div className="relative">
+              <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-400 animate-ping opacity-50" />
+            </div>
+            <p className="text-xs text-gray-400">
+              {user?.name || 'Admin'} 
+              <span className="ml-1 text-[10px] text-cyan-400 flex items-center gap-1">
+                <Sparkles size={10} />
+                Online
+              </span>
             </p>
           </div>
         </div>
@@ -102,15 +117,31 @@ export default function ERPLayout() {
               end={item.to === '/admin'}
               onClick={() => setOpen(false)}
               className={({ isActive }) =>
-                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-300 group relative ${
                   isActive
                     ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/10'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 border border-transparent'
                 }`
               }
             >
-              {item.icon}
-              <span>{item.label}</span>
+              {({ isActive }) => (
+                <>
+                  {/* Active indicator */}
+                  {isActive && (
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-r-full" />
+                  )}
+                  
+                  <span className={`transition-transform group-hover:scale-110 ${isActive ? 'text-cyan-400' : 'text-gray-500 group-hover:text-white'}`}>
+                    {item.icon}
+                  </span>
+                  <span>{item.label}</span>
+
+                  {/* Active glow */}
+                  {isActive && (
+                    <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/5 to-transparent pointer-events-none" />
+                  )}
+                </>
+              )}
             </NavLink>
           ))}
         </nav>
@@ -122,27 +153,31 @@ export default function ERPLayout() {
             href="/"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-all duration-200 w-full group"
           >
-            <Home size={18} />
+            <Home size={18} className="group-hover:text-cyan-400 transition-colors" />
             <span>Visit Site</span>
-            <ExternalLink size={12} className="ml-auto" />
+            <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
 
           {/* Logout */}
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full group"
           >
-            <LogOut size={18} />
+            <LogOut size={18} className="group-hover:text-red-400 transition-colors" />
             <span>Logout</span>
           </button>
         </div>
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 p-4 md:p-6 overflow-auto bg-gradient-to-br from-[#020617] to-[#0a0f1e]">
-        <Outlet />
+      <div className="flex-1 p-4 md:p-6 overflow-auto relative">
+        {/* Content gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-br from-[#020617]/50 via-transparent to-[#0a0f1e]/50 pointer-events-none" />
+        <div className="relative z-10">
+          <Outlet />
+        </div>
       </div>
     </div>
   )
