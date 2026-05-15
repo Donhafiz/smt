@@ -2,7 +2,8 @@ import Product from '../models/Product.js'
 
 export const getProducts = async (req, res) => {
   try {
-    const products = await Product.find({ tenantId: req.tenantId || 'default-tenant' })
+    // Public — return all active products, no tenant filter needed
+    const products = await Product.find({ isActive: true })
     res.json(products)
   } catch (err) {
     res.status(500).json({ message: err.message })

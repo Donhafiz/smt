@@ -1,28 +1,49 @@
-getIO().emit('payment-success', {
-  message: '💳 Payment completed successfully'
-})
+import axios from 'axios'
 
-await sendEmail({
+const PAYSTACK_SECRET = process.env.PAYSTACK_SECRET_KEY
+const PAYSTACK_BASE = 'https://api.paystack.co'
 
-  to: order.customerEmail,
+export const initializePayment = async (req, res) => {
+  try {
+    const { email, amount, metadata } = req.body
 
-  subject: '💳 Payment Receipt',
+    const response = await axios.post(
+      `${PAYSTACK_BASE}/transaction/initialize`,
+      {
+        email,
+        amount: amount * 100, // Convert to kobo/pesewas
+        metadata,
+        callback_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/payment-success`
+      },
+      {
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRET}`,
+          'Content-Type': 'application/json'
+        }
+      }
+    )
 
-  html: `
-    <div style="font-family: Arial; padding: 20px;">
+    res.json(response.data)
+  } catch (err) {
+    res.status(400).json({ message: err.response?.data?.message || 'Payment initialization failed' })
+  }
+}
 
-      <h2>Payment Successful</h2>
+export const verifyPayment = async (req, res) => {
+  try {
+    const { reference } = req.params
 
-      <p>
-        Your payment has been confirmed.
-      </p>
+    const response = await axios.get(
+      `${PAYSTACK_BASE}/transaction/verify/${reference}`,
+      {
+        headers: {
+          Authorization: `Bearer ${PAYSTACK_SECRET}`
+        }
+      }
+    )
 
-      <h3>Amount Paid: GHS ${order.total}</h3>
-
-      <p>
-        Reference: ${order._id}
-      </p>
-
-    </div>
-  `
-})
+    res.json(response.data)
+  } catch (err) {
+    res.status(400).json({ message: 'Payment verification failed' })
+  }
+}

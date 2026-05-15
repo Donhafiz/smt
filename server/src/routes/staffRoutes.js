@@ -4,7 +4,10 @@ import { protect } from '../middleware/authMiddleware.js'
 
 const router = express.Router()
 
-router.get('/', protect, getStaff)
+// Public — anyone can view staff
+router.get('/', getStaff)
+
+// Protected — only admin can modify
 router.post('/', protect, createStaff)
 router.put('/:id', protect, updateStaff)
 router.delete('/:id', protect, deleteStaff)

@@ -4,7 +4,10 @@ import { createService, getServices, updateService, deleteService } from '../con
 
 const router = express.Router()
 
-router.get('/', protect, getServices)
+// Public — anyone can view services
+router.get('/', getServices)
+
+// Protected — only admin can modify
 router.post('/', protect, createService)
 router.put('/:id', protect, updateService)
 router.delete('/:id', protect, deleteService)

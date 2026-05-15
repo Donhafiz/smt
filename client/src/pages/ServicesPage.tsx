@@ -9,8 +9,11 @@ export default function ServicesPage() {
 
   useEffect(() => {
     api.get('/services')
-      .then(res => setServices(res.data))
-      .catch(err => console.error('Services fetch error:', err))
+      .then(res => {
+        console.log('Services:', res.data)
+        setServices(res.data || [])
+      })
+      .catch(err => console.error('Error:', err))
       .finally(() => setLoading(false))
   }, [])
 
@@ -43,7 +46,7 @@ export default function ServicesPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {services.map((service, i) => (
               <motion.div
-                key={service._id}
+                key={service._id || i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
@@ -61,9 +64,6 @@ export default function ServicesPage() {
                     {service.category}
                   </span>
                 )}
-                <div className="mt-4 flex items-center gap-1 text-cyan-400 text-sm opacity-0 group-hover:opacity-100 transition-opacity">
-                  Learn more <ArrowRight size={14} />
-                </div>
               </motion.div>
             ))}
           </div>

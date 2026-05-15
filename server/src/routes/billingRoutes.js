@@ -1,41 +1,21 @@
 import express from 'express'
-import Billing from '../models/Billing.js'
+import { protect } from '../middleware/authMiddleware.js'
+import { getPlans, getSubscription, upgradeSubscription, cancelSubscription, getPaymentHistory, getAllSubscriptions, updateSubscription, deleteSubscription } from '../controllers/billingController.js'
 
 const router = express.Router()
 
-// GET CURRENT PLAN
-router.get('/', async (req, res) => {
-  try {
-    const billing = await Billing.findOne({
-      tenantId: req.tenantId
-    })
+// Public
+router.get('/plans', getPlans)
 
-    res.json(billing)
-  } catch (err) {
-    res.status(500).json({ message: err.message })
-  }
-})
+// User
+router.get('/subscription', protect, getSubscription)
+router.post('/upgrade', protect, upgradeSubscription)
+router.post('/cancel', protect, cancelSubscription)
+router.get('/history', protect, getPaymentHistory)
 
-// UPGRADE PLAN (manual for now)
-router.post('/upgrade', async (req, res) => {
-  try {
-    const { plan, amount } = req.body
-
-    const billing = await Billing.findOneAndUpdate(
-      { tenantId: req.tenantId },
-      {
-        plan,
-        amount,
-        status: 'active',
-        nextBillingDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
-      },
-      { new: true, upsert: true }
-    )
-
-    res.json(billing)
-  } catch (err) {
-    res.status(500).json({ message: err.message })
-  }
-})
+// Admin
+router.get('/admin/all', protect, getAllSubscriptions)
+router.put('/admin/:id', protect, updateSubscription)
+router.delete('/admin/:id', protect, deleteSubscription)
 
 export default router

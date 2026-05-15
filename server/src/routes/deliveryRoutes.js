@@ -1,27 +1,14 @@
 import express from 'express'
-
-import {
-  createSubscription,
-  getSubscription
-} from '../controllers/billingController.js'
-
 import { protect } from '../middleware/authMiddleware.js'
-import { attachTenant } from '../middleware/tenantMiddleware.js'
 
 const router = express.Router()
 
-router.post(
-  '/subscribe',
-  protect,
-  attachTenant,
-  createSubscription
-)
+router.get('/', protect, async (req, res) => {
+  res.json({ message: 'Delivery system active' })
+})
 
-router.get(
-  '/current',
-  protect,
-  attachTenant,
-  getSubscription
-)
+router.post('/track', protect, async (req, res) => {
+  res.json({ message: 'Tracking info', orderId: req.body.orderId })
+})
 
 export default router

@@ -34,7 +34,17 @@ export const createStaff = async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
+
+  import { sendWelcomeEmail } from '../services/emailService.js'
+
+  // In createStaff, after creating staff:
+  if (staff.email && tempPassword) {
+    sendWelcomeEmail(staff.email, staff.name, staff.staffId, tempPassword).catch(err =>
+      console.error('Email send failed:', err.message)
+    )
+  }
 }
+
 
 // UPDATE staff
 export const updateStaff = async (req, res) => {
@@ -112,5 +122,33 @@ export const generateIdCard = async (req, res) => {
     res.json({ message: 'ID Card generated', staff })
   } catch (err) {
     res.status(400).json({ message: err.message })
+  }
+}
+
+
+// GET ATTENDANCE
+export const getAttendanceReport = async (req, res) => {
+  try {
+    const { month, year } = req.query
+    const staff = await Staff.findById(req.user.id)
+    
+    const filtered = staff.attendance.filter(a => {
+      const d = new Date(a.date)
+      if (month) return d.getMonth() + 1 === parseInt(month)
+      if (year) return d.getFullYear() === parseInt(year)
+      return true
+    })
+
+    const report = {
+      total: filtered.length,
+      present: filtered.filter(a => a.status === 'Present').length,
+      absent: filtered.filter(a => a.status === 'Absent').length,
+      late: filtered.filter(a => a.status === 'Late').length,
+      records: filtered
+    }
+
+    res.json(report)
+  } catch (err) {
+    res.status(500).json({ message: err.message })
   }
 }

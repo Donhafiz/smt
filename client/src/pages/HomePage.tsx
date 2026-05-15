@@ -9,6 +9,7 @@ import {
   ChevronRight, Send, Quote
 } from 'lucide-react'
 import Logo from '../components/Logo'
+import api from '../lib/axios'
 
 export default function HomePage() {
   const navigate = useNavigate()
@@ -23,16 +24,34 @@ export default function HomePage() {
   const { scrollYProgress } = useScroll()
   const heroY = useTransform(scrollYProgress, [0, 0.3], [0, -100])
   const heroOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0])
-
+  const [products, setProducts] = useState<any[]>([])
+  const [courses, setCourses] = useState<any[]>([])
+  const [staffList, setStaffList] = useState<any[]>([])
   useEffect(() => {
-    const token = localStorage.getItem('token')
-    setIsLoggedIn(!!token)
-    fetch('/health')
-      .then(res => res.json())
-      .then(() => setStatus('online'))
-      .catch(() => setStatus('offline'))
-  }, [])
+  const token = localStorage.getItem('token')
+  setIsLoggedIn(!!token)
 
+  fetch('/health')
+    .then(res => res.json())
+    .then(() => setStatus('online'))
+    .catch(() => setStatus('offline'))
+
+  // Fetch public data
+  const fetchPublicData = async () => {
+    try {
+      const [productsRes, coursesRes] = await Promise.all([
+        api.get('/products'),
+        api.get('/courses')
+      ])
+      setProducts(productsRes.data || [])
+      setCourses(coursesRes.data || [])
+    } catch (err) {
+      console.log('Public data fetch error (non-critical):', err)
+    }
+  }
+  
+  fetchPublicData()
+}, [])
   // Mouse tracking for interactive effects
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -48,47 +67,156 @@ export default function HomePage() {
   }
 
   const stats = [
-    { value: '1,200+', label: 'Students Trained', icon: <Users size={20} />, gradient: 'from-cyan-400 to-blue-500' },
-    { value: '350+', label: 'Projects Delivered', icon: <Award size={20} />, gradient: 'from-purple-400 to-pink-500' },
-    { value: '8+', label: 'Years Experience', icon: <Clock size={20} />, gradient: 'from-orange-400 to-yellow-500' },
+    { value: `${staffList.length || 6}+`, label: 'Team Members', icon: <Users size={20} />, gradient: 'from-cyan-400 to-blue-500' },
+    { value: `${courses.length || 8}+`, label: 'IT Courses', icon: <Award size={20} />, gradient: 'from-purple-400 to-pink-500' },
+    { value: `${products.length || 12}+`, label: 'Products', icon: <ShoppingCart size={20} />, gradient: 'from-orange-400 to-yellow-500' },
     { value: '15+', label: 'Countries Reached', icon: <Globe size={20} />, gradient: 'from-green-400 to-emerald-500' },
   ]
 
   const coreUnits = [
-    {
-      icon: <Monitor size={32} />,
-      title: 'Software Development',
-      desc: 'Custom websites, mobile apps, and enterprise systems built with cutting-edge technology.',
-      features: ['Web Apps', 'Mobile Apps', 'Enterprise', 'APIs'],
-      gradient: 'from-cyan-500 to-blue-600',
-      bgGradient: 'from-cyan-500/10 to-blue-500/5',
-    },
-    {
-      icon: <GraduationCap size={32} />,
-      title: 'IT Training School',
-      desc: 'Professional IT courses with mentorship and certification from industry experts.',
-      features: ['Web Dev', 'Cybersecurity', 'Data Science', 'AI/ML'],
-      gradient: 'from-purple-500 to-pink-600',
-      bgGradient: 'from-purple-500/10 to-pink-500/5',
-    },
-    {
-      icon: <Briefcase size={32} />,
-      title: 'IT Consultancy',
-      desc: 'Strategic technology advisory, digital transformation, and security audits.',
-      features: ['Cloud', 'Security', 'Strategy', 'Support'],
-      gradient: 'from-orange-500 to-red-600',
-      bgGradient: 'from-orange-500/10 to-red-500/5',
-    },
-    {
-      icon: <ShoppingCart size={32} />,
-      title: 'Commerce Market',
-      desc: 'Premium laptops, phones, accessories, and gadgets with fast delivery.',
-      features: ['Laptops', 'Phones', 'Gadgets', 'Accessories'],
-      gradient: 'from-green-500 to-emerald-600',
-      bgGradient: 'from-green-500/10 to-emerald-500/5',
-    },
-  ]
+  {
+    icon: <Monitor size={32} />,
+    title: 'Software Development',
+    desc: 'Custom websites, mobile apps, and enterprise systems built with cutting-edge technology.',
+    features: ['Web Apps', 'Mobile Apps', 'Enterprise', 'APIs'],
+    gradient: 'from-cyan-500 to-blue-600',
+    bgGradient: 'from-cyan-500/10 to-blue-500/5',
+    link: '/software'  // ✅ Redirect to Software page
+  },
+  {
+    icon: <GraduationCap size={32} />,
+    title: 'IT Training School',
+    desc: 'Professional IT courses with mentorship and certification from industry experts.',
+    features: ['Web Dev', 'Cybersecurity', 'Data Science', 'AI/ML'],
+    gradient: 'from-purple-500 to-pink-600',
+    bgGradient: 'from-purple-500/10 to-pink-500/5',
+    link: '/training'  // ✅ Redirect to Training page
+  },
+  {
+    icon: <Briefcase size={32} />,
+    title: 'IT Consultancy',
+    desc: 'Strategic technology advisory, digital transformation, and security audits.',
+    features: ['Cloud', 'Security', 'Strategy', 'Support'],
+    gradient: 'from-orange-500 to-red-600',
+    bgGradient: 'from-orange-500/10 to-red-500/5',
+    link: '/consultancy'  // ✅ Redirect to Consultancy page
+  },
+  {
+    icon: <ShoppingCart size={32} />,
+    title: 'Commerce Market',
+    desc: 'Premium laptops, phones, accessories, and gadgets with fast delivery.',
+    features: ['Laptops', 'Phones', 'Gadgets', 'Accessories'],
+    gradient: 'from-green-500 to-emerald-600',
+    bgGradient: 'from-green-500/10 to-emerald-500/5',
+    link: '/shop'  // ✅ Redirect to Shop page
+  },
+]
 
+{/* Featured Products Section */}
+{products.length > 0 && (
+  <section className="relative py-20 px-6">
+    <div className="max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="text-center mb-12"
+      >
+        <h2 className="text-4xl md:text-5xl font-black">
+          Featured{' '}
+          <span className="bg-gradient-to-r from-cyan-400 to-green-400 bg-clip-text text-transparent">
+            Products
+          </span>
+        </h2>
+      </motion.div>
+
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {products.slice(0, 4).map((product, i) => (
+          <motion.div
+            key={product._id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+            whileHover={{ y: -5 }}
+            onClick={() => navigate('/shop')}
+            className="glass rounded-2xl overflow-hidden cursor-pointer group"
+          >
+            <div className="h-40 overflow-hidden">
+              {product.image ? (
+                <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center text-4xl">🛍️</div>
+              )}
+            </div>
+            <div className="p-4">
+              <h3 className="font-semibold text-sm truncate">{product.name}</h3>
+              <p className="text-cyan-400 font-bold mt-1">GHS {product.price?.toLocaleString()}</p>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="text-center mt-8">
+        <button onClick={() => navigate('/shop')} className="px-6 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold hover:scale-105 transition-all">
+          View All Products →
+        </button>
+      </div>
+    </div>
+  </section>
+)}
+
+{/* Featured Courses Section */}
+{courses.length > 0 && (
+  <section className="relative py-20 px-6">
+    <div className="max-w-7xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        className="text-center mb-12"
+      >
+        <h2 className="text-4xl md:text-5xl font-black">
+          Popular{' '}
+          <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            Courses
+          </span>
+        </h2>
+      </motion.div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {courses.slice(0, 3).map((course, i) => (
+          <motion.div
+            key={course._id}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: i * 0.1 }}
+            whileHover={{ y: -5 }}
+            onClick={() => navigate('/training')}
+            className="glass rounded-2xl p-6 cursor-pointer group"
+          >
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center mb-4">
+              <GraduationCap size={22} className="text-white" />
+            </div>
+            <h3 className="font-bold mb-2">{course.title}</h3>
+            <p className="text-gray-400 text-sm line-clamp-2 mb-3">{course.description}</p>
+            <div className="flex items-center justify-between">
+              <span className="text-purple-400 font-bold">GHS {course.price?.toLocaleString()}</span>
+              <span className="text-xs text-gray-500">{course.duration}</span>
+            </div>
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="text-center mt-8">
+        <button onClick={() => navigate('/training')} className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl font-semibold hover:scale-105 transition-all">
+          View All Courses →
+        </button>
+      </div>
+    </div>
+  </section>
+)}
   const testimonials = [
     { quote: 'SMT transformed our business with a stunning website and ERP system. The team is exceptional.', author: 'Sarah L., CEO', role: 'TechNova Ltd.', avatar: 'S' },
     { quote: 'The IT training gave me a job in cybersecurity within 3 months. Best decision ever!', author: 'Kwame A.', role: 'Graduate 2024', avatar: 'K' },
@@ -352,17 +480,17 @@ export default function HomePage() {
                 transition={{ delay: i * 0.1 }}
                 whileHover={{ scale: 1.02, y: -8 }}
                 className={`group relative p-8 rounded-3xl bg-gradient-to-br ${unit.bgGradient} border border-white/5 backdrop-blur-sm hover:border-white/10 transition-all duration-500 cursor-pointer overflow-hidden`}
-                onClick={() => navigate('/services')}
+                onClick={() => navigate(unit.link)}  // ✅ CHANGED: Now uses each unit's specific link
               >
                 <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${unit.gradient} rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity`} />
-                
+
                 <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${unit.gradient} mb-6 group-hover:scale-110 transition-transform`}>
                   <span className="text-white">{unit.icon}</span>
                 </div>
-                
+
                 <h3 className="text-2xl font-bold mb-3">{unit.title}</h3>
                 <p className="text-gray-400 leading-relaxed mb-6">{unit.desc}</p>
-                
+
                 <div className="flex flex-wrap gap-2">
                   {unit.features.map((feat, j) => (
                     <span

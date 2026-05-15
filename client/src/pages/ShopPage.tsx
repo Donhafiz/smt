@@ -130,14 +130,14 @@ export default function ShopPage() {
                   whileHover={{ y: -5 }}
                   className="bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-cyan-400/30 transition-all group"
                 >
-                  <div className="h-48 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center relative">
-                    <span className="text-4xl">
-                      {product.category === 'Phones' ? '📱' :
-                       product.category === 'Laptops' ? '💻' :
-                       product.category === 'Accessories' ? '🎧' :
-                       product.category === 'Smart Devices' ? '⌚' : '🔌'}
-                    </span>
-                    
+                  <div className="h-48 bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center relative overflow-hidden">
+                    {product.image ? (
+                      <img src={product.image} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                    ) : (
+                      <span className="text-4xl">
+                        {product.category === 'Phones' ? '📱' : product.category === 'Laptops' ? '💻' : product.category === 'Accessories' ? '🎧' : product.category === 'Smart Devices' ? '⌚' : '🔌'}
+                      </span>
+                    )}
                     <button
                       onClick={() => toggleWishlist(product._id)}
                       className="absolute top-3 right-3 p-2 rounded-full bg-black/40 backdrop-blur-sm hover:bg-black/60 transition-all"

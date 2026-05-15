@@ -1,11 +1,9 @@
 import Service from '../models/Service.js'
 
-// GET
+// GET — Public, return all services
 export const getServices = async (req, res) => {
   try {
-    const services = await Service.find({
-      tenantId: req.tenantId || 'default-tenant'
-    })
+    const services = await Service.find()
     res.json(services)
   } catch (err) {
     res.status(500).json({ message: err.message })
@@ -29,7 +27,7 @@ export const createService = async (req, res) => {
 export const updateService = async (req, res) => {
   try {
     const service = await Service.findOneAndUpdate(
-      { _id: req.params.id, tenantId: req.tenantId || 'default-tenant' },
+      { _id: req.params.id },
       req.body,
       { new: true }
     )
@@ -42,10 +40,7 @@ export const updateService = async (req, res) => {
 // DELETE
 export const deleteService = async (req, res) => {
   try {
-    await Service.findOneAndDelete({
-      _id: req.params.id,
-      tenantId: req.tenantId || 'default-tenant'
-    })
+    await Service.findOneAndDelete({ _id: req.params.id })
     res.json({ message: 'Deleted' })
   } catch (err) {
     res.status(500).json({ message: err.message })
