@@ -5,28 +5,22 @@ interface LogoProps {
 
 export default function Logo({ size = 'md', className = '' }: LogoProps) {
   const sizes = {
-    sm: { logo: 'h-9 w-12', text: 'text-[10px]', gap: 'gap-1.5' },
-    md: { logo: 'h-11 w-[58px]', text: 'text-[11px]', gap: 'gap-2' },
-    lg: { logo: 'h-14 w-[72px]', text: 'text-xs', gap: 'gap-2.5' },
+    sm: { container: 'h-8', width: 100 },
+    md: { container: 'h-10', width: 125 },
+    lg: { container: 'h-14', width: 175 },
   }
 
   const s = sizes[size]
 
   return (
-    <div className={`flex flex-col items-center ${s.gap} ${className}`}>
-      {/* Rounded Logo */}
-      <div className={`${s.logo} relative rounded-2xl overflow-hidden shadow-lg shadow-cyan-500/20`}>
+    <div className={`flex items-center gap-3 ${className}`}>
+      <div className={`${s.container} aspect-[5/2] relative flex-shrink-0`}>
         <img 
           src="/smt-logo.svg" 
           alt="Star Media Tech" 
-          className="w-full h-full object-cover rounded-2xl"
+          className="w-full h-full object-contain"
         />
       </div>
-      
-      {/* Site Name Below */}
-      <span className={`${s.text} font-semibold tracking-wide text-gray-300 whitespace-nowrap`}>
-      Star Media Technology
-      </span>
     </div>
   )
 }

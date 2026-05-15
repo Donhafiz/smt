@@ -1,36 +1,49 @@
-<svg width="1200" height="900" viewBox="0 0 1200 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+<svg width="500" height="200" viewBox="0 0 500 200" fill="none" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="bgGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#050816"/>
-      <stop offset="100%" stop-color="#0F172A"/>
+    <linearGradient id="mainGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#3b82f6"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
     </linearGradient>
-    <linearGradient id="silverGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#F8FAFC"/>
-      <stop offset="50%" stop-color="#CBD5E1"/>
-      <stop offset="100%" stop-color="#94A3B8"/>
-    </linearGradient>
-    <linearGradient id="blueGradient" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#38BDF8"/>
-      <stop offset="50%" stop-color="#2563EB"/>
-      <stop offset="100%" stop-color="#1E3A8A"/>
-    </linearGradient>
-    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="8" result="blur"/>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
       <feMerge>
         <feMergeNode in="blur"/>
         <feMergeNode in="SourceGraphic"/>
       </feMerge>
     </filter>
   </defs>
-  <rect width="1200" height="900" fill="url(#bgGradient)"/>
-  <circle cx="600" cy="450" r="220" fill="#2563EB" opacity="0.12" filter="url(#glow)"/>
-  <g transform="translate(180 290)">
-    <path d="M70 70C70 30 100 0 145 0H320V70H170C155 70 145 80 145 95C145 110 155 120 170 120H260C320 120 360 160 360 220C360 285 315 330 250 330H70V260H225C245 260 260 248 260 228C260 210 248 198 228 198H145C95 198 70 160 70 120V70Z" fill="url(#silverGradient)" filter="url(#glow)"/>
-    <path d="M410 330V0H500L600 150L700 0H790V330H710V130L610 270H590L490 130V330H410Z" fill="url(#blueGradient)" filter="url(#glow)"/>
-    <path d="M830 0H1130V80H1020V330H940V80H830V0Z" fill="url(#silverGradient)" filter="url(#glow)"/>
+
+  <!-- S Block -->
+  <g transform="translate(25, 30)">
+    <rect x="0" y="0" width="75" height="75" rx="18" fill="url(#mainGrad)" opacity="0.12"/>
+    <rect x="2" y="2" width="71" height="71" rx="16" fill="url(#mainGrad)" opacity="0.08"/>
+    <text x="37.5" y="53" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" fill="url(#mainGrad)" filter="url(#glow)">S</text>
   </g>
-  <path d="M300 700C500 650 700 650 900 700" stroke="#38BDF8" stroke-width="6" stroke-linecap="round" opacity="0.7"/>
-  <circle cx="250" cy="180" r="3" fill="#38BDF8" opacity="0.7"/>
-  <circle cx="950" cy="220" r="4" fill="#FFFFFF" opacity="0.8"/>
-  <circle cx="860" cy="130" r="2" fill="#38BDF8" opacity="0.6"/>
+
+  <!-- M Block -->
+  <g transform="translate(112, 30)">
+    <rect x="0" y="0" width="75" height="75" rx="18" fill="url(#mainGrad)" opacity="0.08"/>
+    <rect x="2" y="2" width="71" height="71" rx="16" fill="url(#mainGrad)" opacity="0.05"/>
+    <text x="37.5" y="53" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" fill="url(#mainGrad)">M</text>
+  </g>
+
+  <!-- T Block -->
+  <g transform="translate(199, 30)">
+    <rect x="0" y="0" width="75" height="75" rx="18" fill="url(#mainGrad)" opacity="0.04"/>
+    <text x="37.5" y="53" text-anchor="middle" font-family="Arial Black, sans-serif" font-size="42" font-weight="900" fill="url(#mainGrad)">T</text>
+  </g>
+
+  <!-- Vertical divider -->
+  <line x1="290" y1="35" x2="290" y2="105" stroke="url(#mainGrad)" stroke-width="1.5" opacity="0.3" stroke-linecap="round"/>
+
+  <!-- Text Stack -->
+  <g transform="translate(310, 38)">
+    <text x="0" y="0" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="4">STAR</text>
+    <text x="0" y="28" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="url(#mainGrad)" letter-spacing="4">MEDIA</text>
+    <text x="0" y="56" font-family="Arial, sans-serif" font-size="22" font-weight="800" fill="#ffffff" letter-spacing="4">TECH</text>
+  </g>
+
+  <!-- Bottom accent line -->
+  <line x1="310" y1="108" x2="480" y2="108" stroke="url(#mainGrad)" stroke-width="2" opacity="0.4" stroke-linecap="round"/>
 </svg>
