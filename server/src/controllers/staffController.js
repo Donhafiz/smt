@@ -1,7 +1,15 @@
 import Staff from '../models/Staff.js'
 import crypto from 'crypto'
 
-// GET all staff
+// Import email service at the top
+let sendWelcomeEmail = null
+try {
+  const emailModule = await import('../services/emailService.js')
+  sendWelcomeEmail = emailModule.sendWelcomeEmail
+} catch (err) {
+  console.log('Email service not available:', err.message)
+}
+
 export const getStaff = async (req, res) => {
   try {
     const staff = await Staff.find({ tenantId: req.tenantId || 'default-tenant' }).select('-password')
@@ -11,56 +19,48 @@ export const getStaff = async (req, res) => {
   }
 }
 
-// CREATE staff with auto-generated credentials
 export const createStaff = async (req, res) => {
   try {
-    // Generate temporary password
+    const count = await Staff.countDocuments()
+    const year = new Date().getFullYear().toString().slice(-2)
+    const staffId = `SMT-${year}${String(count + 1).padStart(4, '0')}`
     const tempPassword = crypto.randomBytes(4).toString('hex')
 
     const staff = await Staff.create({
       ...req.body,
+      staffId,
+      idCardNumber: `SMT-ID-${staffId}`,
       password: tempPassword,
-      tenantId: req.tenantId || 'default-tenant',
-      canLogin: req.body.canLogin || false
+      tenantId: req.tenantId || 'default-tenant'
     })
 
-    const credentials = {
-      staffId: staff.staffId,
-      email: staff.email,
-      temporaryPassword: tempPassword
+    // Send welcome email if email service is available
+    if (sendWelcomeEmail && staff.email) {
+      sendWelcomeEmail(staff.email, staff.name, staff.staffId, tempPassword).catch(err =>
+        console.error('Email send failed:', err.message)
+      )
     }
 
-    res.status(201).json({ staff, credentials })
+    res.status(201).json({
+      staff: { ...staff.toObject(), password: undefined },
+      credentials: { staffId, email: req.body.email, temporaryPassword: tempPassword }
+    })
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
-
-  import { sendWelcomeEmail } from '../services/emailService.js'
-
-  // In createStaff, after creating staff:
-  if (staff.email && tempPassword) {
-    sendWelcomeEmail(staff.email, staff.name, staff.staffId, tempPassword).catch(err =>
-      console.error('Email send failed:', err.message)
-    )
-  }
 }
 
-
-// UPDATE staff
 export const updateStaff = async (req, res) => {
   try {
-    const staff = await Staff.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    ).select('-password')
+    delete req.body.password
+    delete req.body.staffId
+    const staff = await Staff.findByIdAndUpdate(req.params.id, req.body, { new: true }).select('-password')
     res.json(staff)
   } catch (err) {
     res.status(400).json({ message: err.message })
   }
 }
 
-// DELETE staff
 export const deleteStaff = async (req, res) => {
   try {
     await Staff.findByIdAndDelete(req.params.id)
@@ -70,35 +70,24 @@ export const deleteStaff = async (req, res) => {
   }
 }
 
-// Grant login access
 export const grantAccess = async (req, res) => {
   try {
-    const staff = await Staff.findByIdAndUpdate(
-      req.params.id,
-      { canLogin: true },
-      { new: true }
-    ).select('-password')
+    const staff = await Staff.findByIdAndUpdate(req.params.id, { canLogin: true }, { new: true }).select('-password')
     res.json({ message: 'Access granted', staff })
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    res.status(500).json({ message: err.message })
   }
 }
 
-// Revoke login access
 export const revokeAccess = async (req, res) => {
   try {
-    const staff = await Staff.findByIdAndUpdate(
-      req.params.id,
-      { canLogin: false },
-      { new: true }
-    ).select('-password')
+    const staff = await Staff.findByIdAndUpdate(req.params.id, { canLogin: false }, { new: true }).select('-password')
     res.json({ message: 'Access revoked', staff })
   } catch (err) {
-    res.status(400).json({ message: err.message })
+    res.status(500).json({ message: err.message })
   }
 }
 
-// Reset password
 export const resetPassword = async (req, res) => {
   try {
     const tempPassword = crypto.randomBytes(4).toString('hex')
@@ -111,44 +100,11 @@ export const resetPassword = async (req, res) => {
   }
 }
 
-// Generate ID Card
 export const generateIdCard = async (req, res) => {
   try {
-    const staff = await Staff.findByIdAndUpdate(
-      req.params.id,
-      { idCardGenerated: true },
-      { new: true }
-    ).select('-password')
+    const staff = await Staff.findByIdAndUpdate(req.params.id, { idCardGenerated: true }, { new: true }).select('-password')
     res.json({ message: 'ID Card generated', staff })
   } catch (err) {
     res.status(400).json({ message: err.message })
-  }
-}
-
-
-// GET ATTENDANCE
-export const getAttendanceReport = async (req, res) => {
-  try {
-    const { month, year } = req.query
-    const staff = await Staff.findById(req.user.id)
-    
-    const filtered = staff.attendance.filter(a => {
-      const d = new Date(a.date)
-      if (month) return d.getMonth() + 1 === parseInt(month)
-      if (year) return d.getFullYear() === parseInt(year)
-      return true
-    })
-
-    const report = {
-      total: filtered.length,
-      present: filtered.filter(a => a.status === 'Present').length,
-      absent: filtered.filter(a => a.status === 'Absent').length,
-      late: filtered.filter(a => a.status === 'Late').length,
-      records: filtered
-    }
-
-    res.json(report)
-  } catch (err) {
-    res.status(500).json({ message: err.message })
   }
 }

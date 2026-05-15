@@ -93,17 +93,13 @@ export default function ERPLayout() {
         {/* LOGO */}
         <div className="mb-6 pb-4 border-b border-white/10">
           <Logo size="sm" />
-          <div className="flex items-center gap-2 mt-3">
+          <div className="flex items-center justify-center gap-2 mt-3">
             <div className="relative">
               <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
               <div className="absolute inset-0 w-2 h-2 rounded-full bg-green-400 animate-ping opacity-50" />
             </div>
             <p className="text-xs text-gray-400">
-              {user?.name || 'Admin'} 
-              <span className="ml-1 text-[10px] text-cyan-400 flex items-center gap-1">
-                <Sparkles size={10} />
-                Online
-              </span>
+              {user?.name || 'Admin'}
             </p>
           </div>
         </div>
@@ -126,7 +122,6 @@ export default function ERPLayout() {
             >
               {({ isActive }) => (
                 <>
-                  {/* Active indicator */}
                   {isActive && (
                     <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-gradient-to-b from-cyan-400 to-blue-500 rounded-r-full" />
                   )}
@@ -136,7 +131,6 @@ export default function ERPLayout() {
                   </span>
                   <span>{item.label}</span>
 
-                  {/* Active glow */}
                   {isActive && (
                     <div className="absolute inset-0 rounded-lg bg-gradient-to-r from-cyan-500/5 to-transparent pointer-events-none" />
                   )}
@@ -148,7 +142,6 @@ export default function ERPLayout() {
 
         {/* BOTTOM ACTIONS */}
         <div className="pt-4 border-t border-white/10 space-y-2">
-          {/* Visit Site */}
           <a
             href="/"
             target="_blank"
@@ -160,7 +153,6 @@ export default function ERPLayout() {
             <ExternalLink size={12} className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
           </a>
 
-          {/* Logout */}
           <button
             onClick={handleLogout}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all duration-200 w-full group"
@@ -173,7 +165,6 @@ export default function ERPLayout() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 p-4 md:p-6 overflow-auto relative">
-        {/* Content gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-[#020617]/50 via-transparent to-[#0a0f1e]/50 pointer-events-none" />
         <div className="relative z-10">
           <Outlet />

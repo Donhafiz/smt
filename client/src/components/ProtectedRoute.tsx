@@ -1,20 +1,12 @@
 import { Navigate } from 'react-router-dom'
 
 export default function ProtectedRoute({ children }: any) {
-  const token = localStorage.getItem('token')
-  const user = localStorage.getItem('user')
+  // Check for any valid token (user, staff, or vendor)
+  const token = localStorage.getItem('token') || 
+                localStorage.getItem('staffToken') || 
+                localStorage.getItem('vendorToken')
 
-  if (!token || !user) {
-    return <Navigate to="/login" replace />
-  }
-
-  // Optional: Check if user is valid JSON
-  try {
-    const parsedUser = JSON.parse(user)
-    if (!parsedUser) {
-      return <Navigate to="/login" replace />
-    }
-  } catch {
+  if (!token) {
     return <Navigate to="/login" replace />
   }
 

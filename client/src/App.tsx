@@ -46,6 +46,7 @@ import PrivacyPage from './pages/PrivacyPage'
 import TermsPage from './pages/TermsPage'
 import CookiesPage from './pages/CookiesPage'
 import RefundsPage from './pages/RefundsPage'
+import CourseDetailPage from './pages/CourseDetailPage'
 
 // Staff Portal
 import StaffLoginPage from './pages/staff/StaffLoginPage'
@@ -81,7 +82,7 @@ function App() {
             <Route path="training" element={<TrainingPage />} />
             <Route path="consultancy" element={<ConsultancyPage />} />
             <Route path="software" element={<SoftwarePage />} />
-
+            <Route path="training/:id" element={<CourseDetailPage />} />
             {/* COMPANY */}
             <Route path="careers" element={<CareersPage />} />
             <Route path="press" element={<PressPage />} />

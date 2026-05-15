@@ -1,196 +1,109 @@
-import { useState, FormEvent, ChangeEvent } from 'react'
+import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff, Mail, Lock, AlertCircle, LogIn } from 'lucide-react'
-
-// Use dynamic import to avoid TS error
-const api = (await import('../lib/axios')).default
-
-interface LoginForm {
-  email: string
-  password: string
-}
-
-interface ValidationErrors {
-  email?: string
-  password?: string
-}
+import api from '../lib/axios'
+import { Eye, EyeOff, Mail, Lock, LogIn, Sparkles, Fingerprint } from 'lucide-react'
 
 export default function LoginPage() {
   const navigate = useNavigate()
-
-  const [form, setForm] = useState<LoginForm>({
-    email: '',
-    password: ''
-  })
+  const [form, setForm] = useState({ email: '', password: '', rememberMe: false })
   const [loading, setLoading] = useState(false)
-  const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
-  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({})
+  const [showPassword, setShowPassword] = useState(false)
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setForm({ ...form, [name]: value })
-    setValidationErrors((prev) => ({ ...prev, [name]: '' }))
-  }
-
-  const validate = (): ValidationErrors => {
-    const errors: ValidationErrors = {}
-    if (!form.email.trim()) {
-      errors.email = 'Email is required'
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
-      errors.email = 'Please enter a valid email'
-    }
-    if (!form.password) errors.password = 'Password is required'
-    return errors
-  }
-
-  const handleLogin = async (e: FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
-    const errors = validate()
-    setValidationErrors(errors)
-    if (Object.keys(errors).length > 0) return
-
+    setLoading(true)
+    setError('')
     try {
-      setLoading(true)
-      setError('')
-      
       const res = await api.post('/auth/login', form)
-      
       localStorage.setItem('token', res.data.token)
       localStorage.setItem('user', JSON.stringify(res.data.user))
-
       const role = res.data.user.role
-      
       setTimeout(() => {
-        if (role === 'admin' || role === 'superadmin' || role === 'director') {
-          navigate('/admin')
-        } else if (role === 'vendor') {
-          navigate('/vendor-dashboard')
-        } else if (role === 'driver') {
-          navigate('/driver-dashboard')
-        } else {
-          navigate('/')
-        }
+        if (['admin', 'superadmin', 'director'].includes(role)) navigate('/admin')
+        else if (role === 'vendor') navigate('/vendor-dashboard')
+        else if (role === 'driver') navigate('/driver-dashboard')
+        else navigate('/')
       }, 100)
-
     } catch (err: any) {
-      setError(err?.response?.data?.message || 'Login failed')
+      setError(err?.response?.data?.message || 'Invalid credentials')
     } finally {
       setLoading(false)
     }
   }
 
-  const inputContainer = 'relative group mb-4'
-  const inputBase =
-    'w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-transparent transition-all duration-300 outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400/30 hover:border-white/20'
-  const labelBase =
-    'absolute left-10 top-3.5 text-gray-400 text-sm transition-all duration-300 pointer-events-none'
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white px-4 relative overflow-hidden">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+    <div className="min-h-screen flex items-center justify-center bg-[#020617] px-4 relative overflow-hidden">
+      <div className="absolute inset-0">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute bottom-1/4 -right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000" />
       </div>
 
-      <form
-        onSubmit={handleLogin}
-        className="w-full max-w-md relative z-10 backdrop-blur-xl bg-white/5 border border-white/10 p-8 rounded-2xl shadow-2xl"
-      >
+      <div className="w-full max-w-md relative z-10">
         <div className="text-center mb-8">
-          <div className="mx-auto w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mb-4">
-            <LogIn className="w-6 h-6 text-blue-400" />
+          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mx-auto mb-4 shadow-2xl shadow-cyan-500/25">
+            <Fingerprint size={28} className="text-white" />
           </div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent">
-            Welcome Back
-          </h2>
-          <p className="text-gray-400 mt-2 text-sm">
-            Sign in to your account to continue
-          </p>
+          <h2 className="text-3xl font-black text-white">Welcome Back</h2>
+          <p className="text-gray-400 mt-2">Sign in to your account</p>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-300 text-sm flex items-center gap-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            {error}
-          </div>
-        )}
-
-        <div className={inputContainer}>
-          <Mail className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-blue-400 transition-colors z-10" />
-          <input
-            type="text"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            className={inputBase}
-            placeholder="Email"
-            autoComplete="email"
-          />
-          <label className={`${labelBase} ${form.email ? 'opacity-0' : 'opacity-100'} group-focus-within:-top-3 group-focus-within:left-3 group-focus-within:text-xs group-focus-within:text-blue-400 group-focus-within:bg-slate-900 group-focus-within:px-1`}>
-            Email
-          </label>
-          {validationErrors.email && (
-            <p className="text-red-400 text-xs mt-1 ml-1 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3" /> {validationErrors.email}
-            </p>
+        <form onSubmit={handleLogin} className="glass rounded-3xl p-8 space-y-5">
+          {error && (
+            <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 text-sm">{error}</div>
           )}
-        </div>
 
-        <div className={inputContainer}>
-          <Lock className="absolute left-3 top-3.5 w-5 h-5 text-gray-500 group-focus-within:text-blue-400 transition-colors z-10" />
-          <input
-            type={showPassword ? 'text' : 'password'}
-            name="password"
-            value={form.password}
-            onChange={handleChange}
-            className={inputBase}
-            placeholder="Password"
-            autoComplete="current-password"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3 top-3.5 text-gray-400 hover:text-blue-400 transition-colors z-10"
-            tabIndex={-1}
-          >
-            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+          <div className="relative">
+            <Mail size={18} className="absolute left-4 top-3.5 text-gray-500" />
+            <input type="email" placeholder="Email address" value={form.email}
+              onChange={e => setForm({...form, email: e.target.value})} required
+              className="w-full pl-12 pr-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all" />
+          </div>
+
+          <div className="relative">
+            <Lock size={18} className="absolute left-4 top-3.5 text-gray-500" />
+            <input type={showPassword ? 'text' : 'password'} placeholder="Password" value={form.password}
+              onChange={e => setForm({...form, password: e.target.value})} required
+              className="w-full pl-12 pr-12 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all" />
+            <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-3.5 text-gray-500 hover:text-white">
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center gap-2 text-gray-400 cursor-pointer">
+              <input type="checkbox" checked={form.rememberMe} onChange={e => setForm({...form, rememberMe: e.target.checked})}
+                className="rounded border-gray-600 text-cyan-500 focus:ring-cyan-500" />
+              Remember me
+            </label>
+            <a href="#" className="text-cyan-400 hover:underline">Forgot password?</a>
+          </div>
+
+          <button type="submit" disabled={loading}
+            className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold text-lg hover:scale-[1.02] transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20">
+            {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <LogIn size={20} />}
+            {loading ? 'Signing in...' : 'Sign In'}
           </button>
-          <label className={`${labelBase} ${form.password ? 'opacity-0' : 'opacity-100'} group-focus-within:-top-3 group-focus-within:left-3 group-focus-within:text-xs group-focus-within:text-blue-400 group-focus-within:bg-slate-900 group-focus-within:px-1`}>
-            Password
-          </label>
-          {validationErrors.password && (
-            <p className="text-red-400 text-xs mt-1 ml-1 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3" /> {validationErrors.password}
-            </p>
-          )}
-        </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed shadow-lg shadow-blue-500/25 flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <>
-              <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-              </svg>
-              Signing in...
-            </>
-          ) : (
-            'Sign In'
-          )}
-        </button>
+          <p className="text-center text-gray-500 text-sm">
+            Don't have an account? <Link to="/register" className="text-cyan-400 hover:underline font-medium">Create one</Link>
+          </p>
 
-        <p className="text-sm text-gray-400 mt-6 text-center">
-          Don't have an account?{' '}
-          <Link to="/register" className="text-blue-400 hover:text-blue-300 font-medium transition-colors underline underline-offset-2">
-            Create one
-          </Link>
-        </p>
-      </form>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
+            <div className="relative flex justify-center text-xs"><span className="px-2 bg-[#0f172a] text-gray-500">or continue with</span></div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-3">
+            <Link to="/staff-login" className="py-3 border border-emerald-500/30 rounded-xl text-emerald-400 text-sm font-medium hover:bg-emerald-500/10 transition-all text-center flex items-center justify-center gap-2">
+              <Sparkles size={16} /> Staff Portal
+            </Link>
+            <Link to="/vendor-login" className="py-3 border border-purple-500/30 rounded-xl text-purple-400 text-sm font-medium hover:bg-purple-500/10 transition-all text-center">
+              Vendor Login
+            </Link>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

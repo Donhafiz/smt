@@ -33,6 +33,7 @@ import aiChatRoutes from './routes/aiChatRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import staffPortalRoutes from './routes/staffPortalRoutes.js'
 
+
 const app = express()
 
 // ========================
@@ -55,7 +56,7 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 // ========================
-// PUBLIC ROUTES (NO AUTH) - Must be BEFORE protected routes
+// PUBLIC ROUTES (NO AUTH)
 // ========================
 app.use('/api/auth', authRoutes)
 app.use('/api/webhook', paystackWebhookRoutes)
@@ -64,10 +65,10 @@ app.use('/api/products', productRoutes)
 app.use('/api/courses', courseRoutes)
 app.use('/api/staff', staffRoutes)
 app.use('/api/services', servicesRoutes)
+app.use('/api/vendor', vendorRoutes)  // ✅ MOVE IT HERE
 app.use('/api/ai-requests', aiRequestRoutes)
 app.use('/api/ai-chat', aiChatRoutes)
 app.use('/api/staff-portal', staffPortalRoutes)
-
 // ========================
 // PROTECTED ROUTES (AUTH REQUIRED)
 // NOTE: /api with protect must come AFTER specific /api/* routes

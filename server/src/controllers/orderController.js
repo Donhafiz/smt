@@ -4,7 +4,7 @@ import Product from '../models/Product.js'
 import { getIO } from '../socket.js'
 import eventBus from '../events/eventBus.js'
 
-import { sendEmail } from '../services/emailService.js'
+import { sendOrderConfirmation } from '../services/emailService.js'
 import { emailTemplate } from '../utils/emailTemplate.js'
 
 import { runAlertCenter } from '../services/alertCenter.js'
