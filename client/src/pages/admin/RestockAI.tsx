@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function RestockAI() {
+  const { t } = useTranslation()
 
   const [data, setData] = useState<any>(null)
 
@@ -83,3 +85,4 @@ export default function RestockAI() {
     </div>
   )
 }
+

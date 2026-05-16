@@ -1,8 +1,11 @@
+import { useTranslation } from 'react-i18next'
+
 import { motion } from 'framer-motion'
 import { Link } from 'react-router-dom'
 import { Home, ArrowLeft, Search } from 'lucide-react'
 
 export default function NotFoundPage() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white flex items-center justify-center px-4 relative overflow-hidden">
       {/* Background */}

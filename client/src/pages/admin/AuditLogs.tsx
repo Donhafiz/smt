@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function AuditLogs() {
+  const { t } = useTranslation()
 
   const [logs, setLogs] = useState([])
 
@@ -69,3 +71,4 @@ export default function AuditLogs() {
     </div>
   )
 }
+

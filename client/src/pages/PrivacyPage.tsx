@@ -1,5 +1,8 @@
+import { useTranslation } from 'react-i18next'
+
 // client/src/pages/PrivacyPage.tsx
 export default function PrivacyPage() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen pt-28 px-6 max-w-4xl mx-auto pb-20 prose prose-invert">
       <h1 className="text-4xl font-black">Privacy Policy</h1>
@@ -11,3 +14,5 @@ export default function PrivacyPage() {
 }
 
 // Create similarly for TermsPage, CookiesPage, RefundsPage
+
+

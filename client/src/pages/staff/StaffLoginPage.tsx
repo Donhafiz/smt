@@ -1,9 +1,11 @@
 import { useState, FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { Eye, EyeOff, Mail, Lock, LogIn, AlertCircle, CreditCard } from 'lucide-react'
 
 export default function StaffLoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [form, setForm] = useState({ staffId: '', email: '', password: '' })
   const [loading, setLoading] = useState(false)

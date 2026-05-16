@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 export default function CompanySignup() {
+  const { t } = useTranslation()
 
   const navigate = useNavigate()
 

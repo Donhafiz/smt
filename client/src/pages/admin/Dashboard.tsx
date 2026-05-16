@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import api from '../../lib/axios'
-import { 
-  Wrench, Users, ShoppingCart, DollarSign, 
+import { useLiveData } from '../../hooks/useLiveData'
+import { useTranslation } from 'react-i18next'
+import {   Wrench, Users, ShoppingCart, DollarSign, 
   TrendingUp, UserCheck, Zap, AlertTriangle,
   Package, Brain, Activity
 } from 'lucide-react'
@@ -21,6 +22,7 @@ interface ActivityItem {
 }
 
 export default function Dashboard() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<Stats>({
     services: 0,
     staff: 0,
@@ -32,7 +34,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
-
+  const liveStats = useLiveData()
   useEffect(() => {
     fetchStats()
     const interval = setInterval(fetchStats, 30000)
@@ -136,6 +138,10 @@ export default function Dashboard() {
         </div>
       </div>
 
+      <div className="flex items-center gap-2">
+        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+        <span className="text-xs text-green-400">{liveStats.visitors} live visitors</span>
+      </div>
       {/* ERROR */}
       {error && (
         <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 flex items-center gap-2">

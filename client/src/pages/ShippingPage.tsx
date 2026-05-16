@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next'
+
 import { motion } from 'framer-motion'
 import { Truck, Clock, MapPin, Shield } from 'lucide-react'
 
 export default function ShippingPage() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen pt-28 px-6 max-w-4xl mx-auto pb-20">
       <h1 className="text-5xl font-black text-center bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent mb-4">
@@ -27,3 +30,5 @@ export default function ShippingPage() {
     </div>
   )
 }
+
+

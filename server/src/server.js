@@ -1,31 +1,54 @@
 import http from 'http'
 import dotenv from 'dotenv'
-dotenv.config()  // Load .env FIRST
-
+import { Server } from 'socket.io'
 import app from './app.js'
 import connectDB from './config/db.js'
-import { initSocket } from './socket.js'
 import { startAICronJob } from './jobs/aiCronJob.js'
 
-const PORT = process.env.PORT || 5000
+dotenv.config()
 
 const server = http.createServer(app)
+const io = new Server(server, {
+  cors: { origin: '*', methods: ['GET', 'POST'] }
+})
 
-initSocket(server)
-
-// START SERVER FIRST (don't wait for DB)
-server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`)
-  console.log('ENV CHECK:', process.env.OPENAI_API_KEY ? 'OK' : 'MISSING')
+// WebSocket connection
+io.on('connection', (socket) => {
+  console.log('🔌 Client connected')
   
-  // Connect to DB after server is already running
-  connectDB()
-    .then(() => {
-      console.log('✅ MongoDB connected')
-      startAICronJob()
-    })
-    .catch((err) => {
-      console.error('❌ MongoDB connection failed:', err.message)
-      console.log('⚠️  Server running without database')
-    })
+  // Simulate live visitors
+  const visitorInterval = setInterval(() => {
+    const count = Math.floor(Math.random() * 50) + 10
+    socket.emit('visitorUpdate', count)
+  }, 5000)
+
+  // Simulate new orders
+  const orderInterval = setInterval(() => {
+    if (Math.random() > 0.7) {
+      socket.emit('newOrder', {
+        _id: Date.now().toString(),
+        customerName: 'New Customer',
+        total: Math.floor(Math.random() * 5000) + 100,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      })
+    }
+  }, 10000)
+
+  socket.on('disconnect', () => {
+    clearInterval(visitorInterval)
+    clearInterval(orderInterval)
+    console.log('🔌 Client disconnected')
+  })
+})
+
+// Make io accessible
+app.set('io', io)
+
+connectDB().then(() => {
+  server.listen(process.env.PORT || 5000, () => {
+    console.log(`🚀 Server running on port ${process.env.PORT || 5000}`)
+    console.log('ENV CHECK:', process.env.OPENAI_API_KEY ? 'OK' : 'MISSING')
+    startAICronJob()
+  })
 })

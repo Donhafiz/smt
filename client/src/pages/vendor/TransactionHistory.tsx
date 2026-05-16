@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function TransactionHistory() {
+  const { t } = useTranslation()
 
   const vendor =
     JSON.parse(
@@ -89,3 +91,4 @@ export default function TransactionHistory() {
     </div>
   )
 }
+

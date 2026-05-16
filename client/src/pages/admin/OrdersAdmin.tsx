@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 interface Order {
   _id: string
@@ -12,6 +13,7 @@ interface Order {
 }
 
 export default function OrdersAdmin() {
+  const { t } = useTranslation()
   const [orders, setOrders] = useState<Order[]>([])
   const [filter, setFilter] = useState('all')
   const [loading, setLoading] = useState(true)
@@ -152,3 +154,4 @@ export default function OrdersAdmin() {
     </div>
   )
 }
+

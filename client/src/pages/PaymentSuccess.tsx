@@ -1,8 +1,11 @@
+import { useTranslation } from 'react-i18next'
+
 import { useEffect } from 'react'
 import axios from 'axios'
 import { useCart } from '../context/CartContext'
 
 export default function PaymentSuccess() {
+  const { t } = useTranslation()
   const { clearCart } = useCart()
 
   useEffect(() => {
@@ -26,3 +29,4 @@ export default function PaymentSuccess() {
     </div>
   )
 }
+

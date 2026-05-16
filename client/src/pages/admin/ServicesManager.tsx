@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../../lib/axios'
 import { Wrench, Plus, Edit2, Trash2, X, Save, AlertTriangle } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface Service {
   _id: string
@@ -18,6 +19,7 @@ const emptyForm = {
 }
 
 export default function ServicesManager() {
+  const { t } = useTranslation()
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -243,3 +245,4 @@ export default function ServicesManager() {
     </div>
   )
 }
+

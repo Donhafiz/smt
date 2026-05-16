@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 interface Order {
   total: number
 }
 
 export default function RevenuePrediction() {
+  const { t } = useTranslation()
 
   const [orders, setOrders] = useState<Order[]>([])
 
@@ -84,3 +86,4 @@ export default function RevenuePrediction() {
     </div>
   )
 }
+

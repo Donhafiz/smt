@@ -33,7 +33,6 @@ import aiChatRoutes from './routes/aiChatRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import staffPortalRoutes from './routes/staffPortalRoutes.js'
 
-
 const app = express()
 
 // ========================
@@ -50,33 +49,33 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }))
 app.use(morgan('dev'))
 
 // ========================
-// PUBLIC ENDPOINTS
+// HEALTH CHECK
 // ========================
 app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
+
 // ========================
 // PUBLIC ROUTES (NO AUTH)
 // ========================
 app.use('/api/auth', authRoutes)
 app.use('/api/webhook', paystackWebhookRoutes)
 app.use('/api/webhooks', webhookRoutes)
+app.use('/api/paystack', paystackRoutes)      // ✅ Payment is PUBLIC
 app.use('/api/products', productRoutes)
 app.use('/api/courses', courseRoutes)
 app.use('/api/staff', staffRoutes)
 app.use('/api/services', servicesRoutes)
-app.use('/api/vendor', vendorRoutes)  // ✅ MOVE IT HERE
+app.use('/api/vendor', vendorRoutes)           // ✅ Vendor register/login is PUBLIC
 app.use('/api/ai-requests', aiRequestRoutes)
 app.use('/api/ai-chat', aiChatRoutes)
 app.use('/api/staff-portal', staffPortalRoutes)
+
 // ========================
 // PROTECTED ROUTES (AUTH REQUIRED)
-// NOTE: /api with protect must come AFTER specific /api/* routes
 // ========================
 app.use('/api/analytics', protect, analyticsRoutes)
 app.use('/api/orders', protect, orderRoutes)
-app.use('/api/paystack', protect, paystackRoutes)
-app.use('/api/vendor', protect, vendorRoutes)
 app.use('/api/wallet', protect, walletRoutes)
 app.use('/api/transactions', protect, transactionRoutes)
 app.use('/api/deliveries', protect, deliveryRoutes)
@@ -88,7 +87,7 @@ app.use('/api/onboarding', protect, onboardingRoutes)
 app.use('/api/audit', protect, auditRoutes)
 app.use('/api/ai-advisor', protect, aiAdvisorRoutes)
 app.use('/api/restock', protect, restockRoutes)
-// app.use('/api', protect, routes)  // ❌ REMOVE THIS LINE or move it to the very end
+
 // ========================
 // ERROR HANDLER
 // ========================

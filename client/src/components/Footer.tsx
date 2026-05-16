@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import Logo from './Logo'
 import { 
-  Phone, Mail, MapPin, Clock, ArrowRight, Send,
+  Phone, Mail, MapPin, Clock, Send,
   MessageCircle, Heart, Shield, Zap, Star, Sparkles,
-  ChevronRight, Globe, Users, Award, Building2,
-  Facebook, Twitter, Instagram, Linkedin, Youtube,
-  CheckCircle2, ChevronUp, Quote, ArrowUpRight
+  ChevronRight, ChevronUp, ArrowUpRight, CheckCircle2,
+  Facebook, Twitter, Instagram, Linkedin, Youtube
 } from 'lucide-react'
 
 export default function Footer() {
@@ -24,41 +22,7 @@ export default function Footer() {
 
   const handleSubscribe = (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) {
-      setSubscribed(true)
-      setEmail('')
-      setTimeout(() => setSubscribed(false), 4000)
-    }
-  }
-
-  const footerLinks = {
-    company: [
-      { label: 'About Us', to: '/about' },
-      { label: 'Our Team', to: '/staff' },
-      { label: 'Careers', to: '/careers' },
-      { label: 'Press & Media', to: '/press' },
-      { label: 'Partners', to: '/partners' },
-    ],
-    services: [
-      { label: 'IT Training', to: '/training' },
-      { label: 'Consultancy', to: '/consultancy' },
-      { label: 'Software Products', to: '/software' },
-      { label: 'Commerce Market', to: '/shop' },
-      { label: 'AI Solutions', to: '/consultancy' },
-    ],
-    support: [
-      { label: 'Help Center', to: '/help' },
-      { label: 'FAQs', to: '/faqs' },
-      { label: 'Contact Us', to: '/contact' },
-      { label: 'Track Order', to: '/track-order' },
-      { label: 'Shipping Info', to: '/shipping' },
-    ],
-    legal: [
-      { label: 'Privacy Policy', to: '/privacy' },
-      { label: 'Terms of Service', to: '/terms' },
-      { label: 'Cookie Policy', to: '/cookies' },
-      { label: 'Refund Policy', to: '/refunds' },
-    ],
+    if (email) { setSubscribed(true); setEmail(''); setTimeout(() => setSubscribed(false), 4000) }
   }
 
   const socialLinks = [
@@ -69,240 +33,175 @@ export default function Footer() {
     { icon: <Youtube size={20} />, href: '#', label: 'YouTube', gradient: 'from-red-500 to-red-700' },
   ]
 
+  const quickLinks = [
+    { label: 'About', to: '/about' }, { label: 'Services', to: '/services' },
+    { label: 'Training', to: '/training' }, { label: 'Shop', to: '/shop' },
+    { label: 'Staff', to: '/staff' }, { label: 'Contact', to: '/contact' },
+    { label: 'Careers', to: '/careers' }, { label: 'Partners', to: '/partners' },
+    { label: 'Help', to: '/help' }, { label: 'FAQs', to: '/faqs' },
+    { label: 'Privacy', to: '/privacy' }, { label: 'Terms', to: '/terms' },
+  ]
+
   return (
     <footer className="relative bg-[#010510] border-t border-white/5 overflow-hidden">
-      {/* Animated top line */}
-      <div className="relative h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500">
-        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 animate-pulse" />
+      {/* Top Gradient Line */}
+      <div className="h-[2px] bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500" />
+
+      {/* Background Effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cyan-500/[0.03] rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/[0.03] rounded-full blur-3xl" />
       </div>
 
-      {/* Background pattern */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(circle, #06b6d4 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-      </div>
+      <div className="relative max-w-7xl mx-auto px-6 pt-16 pb-8">
+        
+        {/* ============================================ */}
+        {/* MAIN GRID — LOGO + CONTACT + NEWSLETTER */}
+        {/* ============================================ */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-14">
+          
+          {/* LEFT — LOGO + DESCRIPTION (5 columns) */}
+          <div className="lg:col-span-5">
+            {/* Logo + Name in One Line */}
+            <Link to="/" className="inline-flex items-center gap-3.5 group mb-5">
+              <div className="w-12 h-12 rounded-2xl overflow-hidden ring-2 ring-cyan-500/20 group-hover:ring-cyan-500/40 transition-all">
+                <img src="/smt-logo.png" alt="SMT" className="w-full h-full object-contain p-0.5" />
+              </div>
+              <div>
+                <h2 className="text-xl font-black tracking-tight leading-none">
+                  <span className="text-white">STAR</span>{' '}
+                  <span className="bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">MEDIA</span>{' '}
+                  <span className="text-white">TECH</span>
+                </h2>
+                <p className="text-[9px] text-gray-500 tracking-widest uppercase mt-0.5">Premium Technology Institution</p>
+              </div>
+            </Link>
 
-      {/* Glow orbs */}
-      <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-cyan-500/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-purple-500/5 rounded-full blur-3xl" />
-
-      {/* Main Content */}
-      <div className="relative max-w-7xl mx-auto px-6 pt-20 pb-12">
-        {/* Top Section - Logo + Social */}
-        <div className="flex flex-col lg:flex-row items-start justify-between gap-8 mb-16">
-          {/* Logo & Description */}
-          <div className="max-w-md">
-            <Logo size="lg" />
-            <p className="text-gray-400 mt-4 leading-relaxed">
-              Star Media Tech is Ghana's premier technology institution, delivering world-class software development, IT training, consultancy, and commerce solutions since 2018.
+            {/* Description */}
+            <p className="text-gray-400 text-sm leading-relaxed max-w-md">
+              Star Media Tech is Ghana's premier technology institution, delivering world‑class 
+              software development, IT training, consultancy, and commerce solutions since 2018. 
+              Building Africa's digital future from Tamale.
             </p>
-            
-            {/* Trust badges */}
+
+            {/* Trust Badges */}
             <div className="flex flex-wrap gap-2 mt-5">
               {[
-                { icon: <Star size={12} />, text: 'Best Tech Institute 2024', color: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' },
-                { icon: <Shield size={12} />, text: 'ISO 9001 Certified', color: 'bg-blue-500/10 border-blue-500/20 text-blue-400' },
-                { icon: <Zap size={12} />, text: 'Google Partner', color: 'bg-green-500/10 border-green-500/20 text-green-400' },
+                { icon: <Star size={11} />, text: 'Best Tech Institute 2024', color: 'bg-yellow-500/10 border-yellow-500/20 text-yellow-400' },
+                { icon: <Shield size={11} />, text: 'ISO 9001 Certified', color: 'bg-blue-500/10 border-blue-500/20 text-blue-400' },
+                { icon: <Zap size={11} />, text: 'Google Partner', color: 'bg-green-500/10 border-green-500/20 text-green-400' },
               ].map((badge, i) => (
-                <span key={i} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs ${badge.color}`}>
+                <span key={i} className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-[11px] font-medium ${badge.color}`}>
                   {badge.icon} {badge.text}
                 </span>
               ))}
             </div>
           </div>
 
-          {/* Social Links */}
-          <div className="flex items-center gap-3">
-            {socialLinks.map((social, i) => (
-              <motion.a
-                key={i}
-                href={social.href}
-                aria-label={social.label}
-                whileHover={{ scale: 1.15, y: -4 }}
-                whileTap={{ scale: 0.95 }}
-                className={`p-3 rounded-2xl bg-gradient-to-br ${social.gradient} text-white shadow-lg hover:shadow-xl transition-all`}
-              >
-                {social.icon}
-              </motion.a>
-            ))}
-          </div>
-        </div>
-
-        {/* Newsletter - Full Width Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-cyan-500/15 via-blue-500/10 to-purple-500/15 border border-white/10 p-8 md:p-10 mb-16"
-        >
-          <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/10 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl" />
-          
-          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                  <Sparkles size={16} className="text-white" />
+          {/* MIDDLE — CONTACT (3 columns) */}
+          <div className="lg:col-span-3">
+            <h4 className="text-xs font-bold text-gray-300 uppercase tracking-widest mb-5">Contact</h4>
+            <div className="space-y-3">
+              {[
+                { icon: <Phone size={15} />, label: 'Phone', value: '+233 559 137 611', href: 'tel:+233559137611' },
+                { icon: <Mail size={15} />, label: 'Email', value: 'starmedia568@gmail.com', href: 'mailto:starmedia568@gmail.com' },
+                { icon: <MapPin size={15} />, label: 'Location', value: 'Tamale, Ghana' },
+                { icon: <Clock size={15} />, label: 'Hours', value: 'Mon-Fri: 8AM-6PM, Sat: 9AM-2PM' },
+              ].map((item, i) => (
+                <div key={i} className="flex items-start gap-3 group">
+                  <span className="p-2 rounded-lg bg-white/5 text-gray-400 group-hover:bg-cyan-500/10 group-hover:text-cyan-400 transition-all flex-shrink-0">
+                    {item.icon}
+                  </span>
+                  <div>
+                    <p className="text-[10px] text-gray-500 uppercase tracking-wider">{item.label}</p>
+                    {item.href ? (
+                      <a href={item.href} className="text-sm text-gray-300 hover:text-cyan-400 transition-colors">{item.value}</a>
+                    ) : (
+                      <p className="text-sm text-gray-300">{item.value}</p>
+                    )}
+                  </div>
                 </div>
-                <span className="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Newsletter</span>
-              </div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white">
-                Get Exclusive Insights
-              </h3>
-              <p className="text-gray-400 mt-2 max-w-md">
-                Join 5,000+ subscribers receiving tech tips, course updates, and exclusive offers.
-              </p>
+              ))}
             </div>
+          </div>
 
-            <form onSubmit={handleSubscribe} className="w-full md:w-auto">
+          {/* RIGHT — NEWSLETTER (4 columns) */}
+          <div className="lg:col-span-4">
+            <h4 className="text-xs font-bold text-gray-300 uppercase tracking-widest mb-5">Newsletter</h4>
+            <p className="text-sm text-gray-500 mb-4">Get exclusive updates on courses, tech deals, and insights.</p>
+            
+            <form onSubmit={handleSubscribe} className="flex gap-2">
               {subscribed ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="px-8 py-4 bg-green-500/20 border border-green-500/30 rounded-2xl text-green-400 flex items-center gap-2 font-medium"
-                >
-                  <CheckCircle2 size={20} />
-                  Welcome aboard! 🎉
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                  className="flex-1 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl text-green-400 text-sm flex items-center gap-2">
+                  <CheckCircle2 size={16} /> Subscribed!
                 </motion.div>
               ) : (
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <div className="relative">
-                    <Mail size={18} className="absolute left-4 top-4 text-gray-500" />
-                    <input
-                      type="email"
-                      placeholder="your@email.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      className="pl-12 pr-4 py-4 bg-white/5 border border-white/10 rounded-2xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 w-full sm:w-80 transition-all"
-                    />
+                <>
+                  <div className="relative flex-1">
+                    <Mail size={15} className="absolute left-3.5 top-3.5 text-gray-500" />
+                    <input type="email" placeholder="your@email.com" value={email}
+                      onChange={(e) => setEmail(e.target.value)} required
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all" />
                   </div>
-                  <button
-                    type="submit"
-                    className="px-8 py-4 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-2xl font-semibold hover:scale-105 transition-all flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20"
-                  >
-                    Subscribe
+                  <button type="submit"
+                    className="px-4 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl hover:scale-105 transition-all flex-shrink-0">
                     <Send size={16} />
                   </button>
-                </div>
+                </>
               )}
             </form>
           </div>
-
-          {/* Stats inside newsletter card */}
-          <div className="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-6 mt-10 pt-8 border-t border-white/10">
-            {[
-              { value: '350+', label: 'Projects Delivered' },
-              { value: '1,200+', label: 'Students Trained' },
-              { value: '50+', label: 'Trusted Partners' },
-              { value: '15+', label: 'Countries Reached' },
-            ].map((stat, i) => (
-              <div key={i} className="text-center group cursor-default">
-                <div className="text-3xl font-black text-white group-hover:text-cyan-400 transition-colors">
-                  {stat.value}
-                </div>
-                <div className="text-sm text-gray-500 mt-1">{stat.label}</div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        {/* Links Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 mb-16">
-          {/* Contact Column */}
-          <div>
-            <h4 className="font-bold text-white mb-5 text-sm uppercase tracking-wider flex items-center gap-2">
-              <Phone size={14} className="text-cyan-400" /> Contact
-            </h4>
-            <div className="space-y-4">
-              <a href="tel:+233559137611" className="flex items-start gap-3 group">
-                <span className="p-2.5 rounded-xl bg-cyan-500/10 text-cyan-400 group-hover:bg-cyan-500/20 transition-all mt-0.5">
-                  <Phone size={14} />
-                </span>
-                <div>
-                  <p className="text-sm text-white group-hover:text-cyan-400 transition-colors">+233 559 137 611</p>
-                  <p className="text-xs text-gray-600">Sales & Support</p>
-                </div>
-              </a>
-              <a href="mailto:starmedia568@gmail.com" className="flex items-start gap-3 group">
-                <span className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 group-hover:bg-blue-500/20 transition-all mt-0.5">
-                  <Mail size={14} />
-                </span>
-                <div>
-                  <p className="text-sm text-white group-hover:text-blue-400 transition-colors">starmedia568@gmail.com</p>
-                  <p className="text-xs text-gray-600">Email Us</p>
-                </div>
-              </a>
-              <div className="flex items-start gap-3">
-                <span className="p-2.5 rounded-xl bg-purple-500/10 text-purple-400 mt-0.5">
-                  <MapPin size={14} />
-                </span>
-                <div>
-                  <p className="text-sm text-white">Tamale, Ghana</p>
-                  <p className="text-xs text-gray-600">Visit Our Office</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <span className="p-2.5 rounded-xl bg-green-500/10 text-green-400 mt-0.5">
-                  <Clock size={14} />
-                </span>
-                <div>
-                  <p className="text-sm text-white">Mon - Fri: 8AM - 6PM</p>
-                  <p className="text-xs text-gray-600">Sat: 9AM - 2PM</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Link Columns */}
-          {Object.entries(footerLinks).map(([title, links]) => (
-            <div key={title}>
-              <h4 className="font-bold text-white mb-5 text-sm uppercase tracking-wider">
-                {title}
-              </h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      to={link.to}
-                      className="text-sm text-gray-500 hover:text-cyan-400 transition-all flex items-center gap-1.5 group"
-                    >
-                      <span className="w-0 group-hover:w-4 transition-all overflow-hidden text-cyan-400">
-                        <ArrowRight size={12} />
-                      </span>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
         </div>
 
-        {/* Bottom Bar */}
-        <div className="border-t border-white/5 pt-8">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            {/* Copyright */}
-            <div className="text-center md:text-left">
-              <p className="text-sm text-gray-600">
-                © {currentYear} Star Media Tech. All rights reserved.
-              </p>
-              <p className="text-xs text-gray-700 mt-1 flex items-center justify-center md:justify-start gap-1">
-                Made with <Heart size={10} className="text-red-400 fill-red-400 animate-pulse" /> in Ghana • Powered by Innovation
-              </p>
-            </div>
+        {/* ============================================ */}
+        {/* QUICK LINKS */}
+        {/* ============================================ */}
+        <div className="border-t border-white/5 pt-8 mb-8">
+          <div className="flex flex-wrap gap-x-6 gap-y-2 justify-center">
+            {quickLinks.map((link) => (
+              <Link key={link.label} to={link.to}
+                className="text-sm text-gray-500 hover:text-cyan-400 transition-colors">
+                {link.label}
+              </Link>
+            ))}
+          </div>
+        </div>
 
-            {/* WhatsApp + Quote */}
-            <div className="flex flex-col items-center gap-3">
-              <a
-                href="https://wa.me/233559137611"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2.5 px-5 py-3 bg-green-500/20 border border-green-500/30 rounded-2xl text-green-400 text-sm font-semibold hover:bg-green-500/30 transition-all shadow-lg shadow-green-500/10"
-              >
-                <MessageCircle size={18} />
-                Chat on WhatsApp
-                <ArrowUpRight size={14} />
-              </a>
+        {/* ============================================ */}
+        {/* BOTTOM BAR — SOCIAL + WHATSAPP + COPYRIGHT */}
+        {/* ============================================ */}
+        <div className="border-t border-white/5 pt-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-5">
+            
+            {/* Copyright */}
+            <p className="text-xs text-gray-600 text-center md:text-left">
+              © {currentYear} Star Media Tech. All rights reserved.{' '}
+              <span className="inline-flex items-center gap-1">
+                Made with <Heart size={10} className="text-red-400 fill-red-400 animate-pulse" /> in Ghana
+              </span>
+            </p>
+
+            {/* Social + WhatsApp — Perfectly Aligned */}
+            <div className="flex items-center gap-3">
+              {/* Social Icons */}
+              {socialLinks.map((social, i) => (
+                <motion.a key={i} href={social.href} aria-label={social.label}
+                  whileHover={{ scale: 1.1, y: -2 }} whileTap={{ scale: 0.95 }}
+                  className={`p-2.5 rounded-xl bg-gradient-to-br ${social.gradient} text-white shadow-lg hover:shadow-xl transition-all`}>
+                  {social.icon}
+                </motion.a>
+              ))}
+
+              {/* Divider */}
+              <div className="w-px h-7 bg-white/10 mx-1" />
+
+              {/* WhatsApp */}
+              <motion.a href="https://wa.me/233559137611" target="_blank" rel="noopener noreferrer"
+                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
+                className="inline-flex items-center gap-2 px-4 py-2.5 bg-green-500/20 border border-green-500/30 rounded-xl text-green-400 text-sm font-semibold hover:bg-green-500/30 transition-all shadow-lg shadow-green-500/10">
+                <MessageCircle size={17} /> WhatsApp <ArrowUpRight size={13} />
+              </motion.a>
             </div>
           </div>
         </div>
@@ -311,13 +210,9 @@ export default function Footer() {
       {/* Back to Top */}
       <AnimatePresence>
         {showBackToTop && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0 }}
+          <motion.button initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0 }}
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="fixed bottom-8 right-8 z-50 p-4 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-2xl shadow-cyan-500/30 hover:scale-110 transition-all group"
-          >
+            className="fixed bottom-8 right-8 z-50 p-4 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-2xl shadow-cyan-500/30 hover:scale-110 transition-all group">
             <ChevronUp size={22} className="group-hover:-translate-y-1 transition-transform" />
           </motion.button>
         )}

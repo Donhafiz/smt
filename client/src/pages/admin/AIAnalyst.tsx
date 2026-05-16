@@ -1,8 +1,8 @@
 import { useState, useRef, useEffect } from 'react'
 import api from '../../lib/axios'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Brain, Send, Sparkles, TrendingUp, TrendingDown,
+import { useTranslation } from 'react-i18next'
+import {   Brain, Send, Sparkles, TrendingUp, TrendingDown,
   DollarSign, ShoppingCart, Users, Package, ChartBar,
   Lightbulb, Zap, RefreshCw, Trash2, Copy, Check,
   Download, History, ArrowRight, Bot, User
@@ -16,6 +16,7 @@ interface Message {
 }
 
 export default function AIAnalyst() {
+  const { t } = useTranslation()
   const [messages, setMessages] = useState<Message[]>([
     {
       role: 'assistant',
@@ -284,3 +285,5 @@ export default function AIAnalyst() {
     </div>
   )
 }
+
+

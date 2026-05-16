@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next'
+
 import { motion } from 'framer-motion'
 import { Newspaper, ExternalLink } from 'lucide-react'
 
 export default function PressPage() {
+  const { t } = useTranslation()
   const articles = [
     { title: 'Star Media Tech Launches AI Training Program', date: 'March 2025', source: 'TechAfrica News' },
     { title: 'SMT Expands to Serve Pan-African Market', date: 'January 2025', source: 'Business Ghana' },
@@ -43,3 +46,5 @@ export default function PressPage() {
     </div>
   )
 }
+
+

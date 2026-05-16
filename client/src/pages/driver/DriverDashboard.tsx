@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function DriverDashboard() {
+  const { t } = useTranslation()
 
   const [deliveries,
     setDeliveries] =
@@ -145,3 +147,4 @@ export default function DriverDashboard() {
     </div>
   )
 }
+

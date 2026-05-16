@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useCart } from '../context/CartContext'
 import { 
   Search, ShoppingCart, Heart, Star, X, Plus, Minus,
@@ -19,6 +20,7 @@ interface Product {
 }
 
 export default function ShopPage() {
+  const { t } = useTranslation()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -178,12 +180,20 @@ export default function ShopPage() {
                 <X size={20} />
               </button>
               
-              <div className="h-56 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center mb-4 overflow-hidden">
-                {selectedProduct.image ? (
-                  <img src={selectedProduct.image} alt={selectedProduct.name} className="w-full h-full object-cover" />
-                ) : <span className="text-6xl">🛍️</span>}
+              {/* 3D-like rotation on hover */}
+              <div className="h-56 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center mb-4 overflow-hidden group perspective-1000">
+                <motion.div
+                  whileHover={{ rotateY: 15, rotateX: -5, scale: 1.05 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                  className="w-full h-full flex items-center justify-center"
+                >
+                  {selectedProduct.image ? (
+                    <img src={selectedProduct.image} alt={selectedProduct.name} className="w-3/4 h-3/4 object-contain" />
+                  ) : (
+                    <span className="text-6xl">🛍️</span>
+                  )}
+                </motion.div>
               </div>
-
               <span className="text-xs text-cyan-400">{selectedProduct.category}</span>
               <h2 className="text-2xl font-bold mt-1">{selectedProduct.name}</h2>
               <p className="text-3xl font-black text-cyan-400 mt-2">GHS {selectedProduct.price?.toLocaleString()}</p>

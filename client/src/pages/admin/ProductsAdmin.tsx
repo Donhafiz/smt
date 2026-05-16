@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../../lib/axios'
 import { Package, Plus, Edit2, Trash2, X, Save, Image } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface Product {
   _id: string
@@ -22,6 +23,7 @@ const emptyForm = {
 }
 
 export default function ProductsAdmin() {
+  const { t } = useTranslation()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -287,3 +289,4 @@ export default function ProductsAdmin() {
     </div>
   )
 }
+

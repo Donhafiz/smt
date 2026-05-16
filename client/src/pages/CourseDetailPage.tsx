@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import api from '../lib/axios'
 import { BookOpen, Clock, DollarSign, User, Calendar, CheckCircle2, ArrowLeft, GraduationCap, Star, Users, Award } from 'lucide-react'
 
 export default function CourseDetailPage() {
+  const { t } = useTranslation()
   const { id } = useParams()
   const navigate = useNavigate()
   const [course, setCourse] = useState<any>(null)

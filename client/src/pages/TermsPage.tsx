@@ -1,4 +1,7 @@
+import { useTranslation } from 'react-i18next'
+
 export default function TermsPage() {
+  const { t } = useTranslation()
   return (
     <div className="min-h-screen pt-28 px-6 max-w-4xl mx-auto pb-20">
       <h1 className="text-5xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent mb-4">
@@ -40,3 +43,5 @@ export default function TermsPage() {
     </div>
   )
 }
+
+

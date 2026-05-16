@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../lib/axios'
 import { motion } from 'framer-motion'
 import { 
@@ -9,6 +10,7 @@ import {
 } from 'lucide-react'
 
 export default function VendorRegisterPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [form, setForm] = useState({
     name: '', email: '', phone: '', storeName: '',

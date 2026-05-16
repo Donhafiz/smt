@@ -1,8 +1,10 @@
 import { useState } from 'react'
 import api from '../../lib/axios'
 import { Key, Lock, Save } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function StaffChangePasswordPage() {
+  const { t } = useTranslation()
   const [form, setForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' })
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
@@ -67,3 +69,4 @@ export default function StaffChangePasswordPage() {
     </div>
   )
 }
+

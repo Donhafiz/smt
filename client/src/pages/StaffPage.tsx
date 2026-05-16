@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  Users, Search, X, Mail, Phone, MapPin, Briefcase,
+import { useTranslation } from 'react-i18next'
+import {   Users, Search, X, Mail, Phone, MapPin, Briefcase,
   GraduationCap, Star, Award, Linkedin, Twitter, Globe,
   ChevronRight, Filter, SlidersHorizontal, Grid3X3, List,
   Sparkles, MessageCircle, Calendar, Clock, Shield
@@ -23,6 +23,7 @@ interface StaffMember {
 }
 
 export default function StaffPage() {
+  const { t } = useTranslation()
   const [staff, setStaff] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -292,3 +293,5 @@ export default function StaffPage() {
     </div>
   )
 }
+
+

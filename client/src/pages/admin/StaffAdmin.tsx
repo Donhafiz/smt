@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function StaffAdmin() {
+  const { t } = useTranslation()
   const [staff, setStaff] = useState<any[]>([])
   const [form, setForm] = useState({
     name: '',
@@ -121,3 +123,4 @@ export default function StaffAdmin() {
     </div>
   )
 }
+

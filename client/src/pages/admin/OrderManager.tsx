@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import api from '../../lib/axios'
 import { ShoppingCart, Eye, CheckCircle, XCircle, Clock } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 export default function OrderManager() {
+  const { t } = useTranslation()
   const [orders, setOrders] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -91,3 +93,4 @@ export default function OrderManager() {
     </div>
   )
 }
+

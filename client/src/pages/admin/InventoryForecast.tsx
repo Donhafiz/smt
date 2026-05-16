@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 interface Product {
   _id: string
@@ -9,6 +10,7 @@ interface Product {
 }
 
 export default function InventoryForecast() {
+  const { t } = useTranslation()
 
   const [products, setProducts] = useState<Product[]>([])
 
@@ -105,3 +107,4 @@ export default function InventoryForecast() {
     </div>
   )
 }
+

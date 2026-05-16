@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useCart } from '../../context/CartContext'
-import {
-  getProducts,
+import { useTranslation } from 'react-i18next'
+import {   getProducts,
   createProduct,
   updateProduct,
   deleteProduct
@@ -17,6 +17,7 @@ interface Product {
 }
 
 export default function CommerceManager() {
+  const { t } = useTranslation()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
@@ -288,3 +289,5 @@ export default function CommerceManager() {
     </div>
   )
 }
+
+

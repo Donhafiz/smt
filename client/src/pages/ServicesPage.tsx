@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { motion } from 'framer-motion'
 import { 
   Wrench, ArrowRight, Monitor, GraduationCap, Briefcase, ShoppingCart,
@@ -48,6 +49,7 @@ const categoryFeatures: Record<string, string[]> = {
 }
 
 export default function ServicesPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [services, setServices] = useState<Service[]>([])
   const [loading, setLoading] = useState(true)

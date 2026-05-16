@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import axios from 'axios'
+import { useTranslation } from 'react-i18next'
 
 export default function OrderTracking() {
+  const { t } = useTranslation()
   const [reference, setReference] = useState('')
   const [order, setOrder] = useState<any>(null)
   const [loading, setLoading] = useState(false)
@@ -89,3 +91,4 @@ export default function OrderTracking() {
     </div>
   )
 }
+

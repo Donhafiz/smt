@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import api from '../../lib/axios'
 import { motion } from 'framer-motion'
-import { 
-  CreditCard, Check, Zap, Crown, Star, ArrowRight,
+import { useTranslation } from 'react-i18next'
+import {   CreditCard, Check, Zap, Crown, Star, ArrowRight,
   Plus, Edit2, Trash2, X, Save, History, TrendingUp,
   Download, RefreshCw, AlertCircle, Building2
 } from 'lucide-react'
@@ -27,6 +27,7 @@ interface Subscription {
 }
 
 export default function Billing() {
+  const { t } = useTranslation()
   const [plans, setPlans] = useState<Record<string, Plan>>({})
   const [subscription, setSubscription] = useState<Subscription | null>(null)
   const [allSubscriptions, setAllSubscriptions] = useState<Subscription[]>([])
@@ -336,3 +337,5 @@ export default function Billing() {
     </div>
   )
 }
+
+

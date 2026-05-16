@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import api from '../../lib/axios'
 import { GraduationCap, Plus, Edit2, Trash2, X, Save, BookOpen, Clock, DollarSign } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 interface Course {
   _id: string
@@ -24,6 +25,7 @@ const emptyForm = {
 }
 
 export default function CoursesAdmin() {
+  const { t } = useTranslation()
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -296,3 +298,4 @@ export default function CoursesAdmin() {
     </div>
   )
 }
+

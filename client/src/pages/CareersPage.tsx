@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next'
+
 import { motion } from 'framer-motion'
 import { Briefcase, MapPin, Clock, ArrowRight } from 'lucide-react'
 
 export default function CareersPage() {
+  const { t } = useTranslation()
   const jobs = [
     { title: 'Senior Web Developer', dept: 'Software Development', location: 'Tamale, Ghana', type: 'Full-time' },
     { title: 'IT Trainer', dept: 'IT Training School', location: 'Tamale, Ghana', type: 'Full-time' },
@@ -52,3 +55,5 @@ export default function CareersPage() {
     </div>
   )
 }
+
+

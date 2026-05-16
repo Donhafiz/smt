@@ -1,8 +1,11 @@
+import { useTranslation } from 'react-i18next'
+
 import { motion } from 'framer-motion'
 import { HelpCircle, ChevronDown, Search } from 'lucide-react'
 import { useState } from 'react'
 
 export default function HelpCenterPage() {
+  const { t } = useTranslation()
   const [openIndex, setOpenIndex] = useState<number | null>(null)
 
   const faqs = [
@@ -54,3 +57,5 @@ export default function HelpCenterPage() {
     </div>
   )
 }
+
+

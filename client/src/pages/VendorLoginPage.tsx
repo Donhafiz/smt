@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../lib/axios'
 import { 
   Eye, EyeOff, Mail, Lock, LogIn, Store, 
@@ -8,6 +9,7 @@ import {
 } from 'lucide-react'
 
 export default function VendorLoginPage() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [form, setForm] = useState({ email: '', password: '', rememberMe: false })
   const [loading, setLoading] = useState(false)

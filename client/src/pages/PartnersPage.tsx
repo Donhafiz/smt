@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next'
+
 import { motion } from 'framer-motion'
 import { Building2, Star } from 'lucide-react'
 
 export default function PartnersPage() {
+  const { t } = useTranslation()
   const partners = [
     { name: 'Google', type: 'Technology Partner' },
     { name: 'Microsoft', type: 'Training Partner' },
@@ -44,3 +47,5 @@ export default function PartnersPage() {
     </div>
   )
 }
+
+

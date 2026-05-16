@@ -1,7 +1,10 @@
+import { useTranslation } from 'react-i18next'
+
 import { useState } from 'react'
 import axios from 'axios'
 
 export default function TrackOrderPage() {
+  const { t } = useTranslation()
 
   const [trackingCode,
     setTrackingCode] =
@@ -142,3 +145,4 @@ export default function TrackOrderPage() {
     </div>
   )
 }
+

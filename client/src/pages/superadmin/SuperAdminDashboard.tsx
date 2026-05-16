@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import api from '../../lib/axios'
 import { motion } from 'framer-motion'
-import { 
-  Building2, Users, ShoppingCart, DollarSign, Activity,
+import { useTranslation } from 'react-i18next'
+import {   Building2, Users, ShoppingCart, DollarSign, Activity,
   Server, Database, Cpu, Globe, Shield, Zap,
   TrendingUp, TrendingDown, AlertTriangle, CheckCircle,
   Eye, Edit, Trash2, Search, RefreshCw, Download,
@@ -33,6 +33,7 @@ interface PlatformStats {
 }
 
 export default function SuperAdminDashboard() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState<PlatformStats>({
     totalTenants: 0,
     totalUsers: 0,
@@ -273,3 +274,5 @@ export default function SuperAdminDashboard() {
     </div>
   )
 }
+
+

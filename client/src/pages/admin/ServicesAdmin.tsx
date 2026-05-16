@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import {
-  getServices,
+import { useTranslation } from 'react-i18next'
+import {   getServices,
   createService,
   updateService,
   deleteService
@@ -15,6 +15,7 @@ interface Service {
 }
 
 export default function ServicesAdmin() {
+  const { t } = useTranslation()
   const [services, setServices] = useState<Service[]>([])
   const [form, setForm] = useState({
     title: '',
@@ -146,3 +147,5 @@ export default function ServicesAdmin() {
     </div>
   )
 }
+
+

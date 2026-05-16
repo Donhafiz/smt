@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../../lib/axios'
 import { 
   Wallet, DollarSign, TrendingUp, TrendingDown, ArrowUp,
@@ -29,6 +30,7 @@ interface WalletData {
 }
 
 export default function VendorWallet() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const vendor = JSON.parse(localStorage.getItem('vendorUser') || localStorage.getItem('vendor') || '{}')
   

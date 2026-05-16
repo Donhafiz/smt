@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import api from '../../lib/axios'
 import { motion } from 'framer-motion'
-import { 
-  Save, Camera, User, Upload, X, Check,
+import { useTranslation } from 'react-i18next'
+import {   Save, Camera, User, Upload, X, Check,
   Mail, Phone, MapPin, Briefcase, Calendar,
   GraduationCap, Star, Award, BookOpen,
   Heart, Shield, Edit3, Trash2, Plus,
@@ -46,6 +46,7 @@ interface Profile {
 }
 
 export default function StaffProfilePage() {
+  const { t } = useTranslation()
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -489,3 +490,5 @@ function Globe({ size = 16, className = '' }) {
     </svg>
   )
 }
+
+
