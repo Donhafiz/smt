@@ -3,7 +3,7 @@ import api from '../../lib/axios'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import {   Brain, Send, Sparkles, TrendingUp, TrendingDown,
-  DollarSign, ShoppingCart, Users, Package, ChartBar,
+  DollarSign, ShoppingCart, Users, Package, BarChart3,
   Lightbulb, Zap, RefreshCw, Trash2, Copy, Check,
   Download, History, ArrowRight, Bot, User
 } from 'lucide-react'
