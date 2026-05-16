@@ -26,13 +26,13 @@ export default function HomePage() {
     const token = localStorage.getItem('token')
     setIsLoggedIn(!!token)
 
-    fetch('/health')
+    fetch('https://smt-backend-amad.onrender.com/health')
       .then(res => res.json())
       .then(() => setStatus('online'))
       .catch(() => setStatus('offline'))
 
-    fetch('/api/products').then(r => r.json()).then(d => setProducts(d || [])).catch(() => {})
-    fetch('/api/courses').then(r => r.json()).then(d => setCourses(d || [])).catch(() => {})
+    fetch('https://smt-backend-amad.onrender.com/api/products').then(r => r.json()).then(d => setProducts(d || [])).catch(() => {})
+    fetch('https://smt-backend-amad.onrender.com/api/courses').then(r => r.json()).then(d => setCourses(d || [])).catch(() => {})
   }, [])
 
   const handlePrimaryAction = () => {
