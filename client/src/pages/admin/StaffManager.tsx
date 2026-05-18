@@ -6,7 +6,7 @@ import StaffIDCard from '../../components/StaffIDCard'
 import { 
   Users, Plus, Edit2, Trash2, X, Save, AlertTriangle, Copy, 
   Eye, EyeOff, Key, CreditCard, Printer, Mail, Phone, MapPin,
-  Award, Shield, User
+  Award, Shield, User, RefreshCw
 } from 'lucide-react'
 
 interface Staff {
@@ -22,6 +22,7 @@ interface Staff {
   idCardGenerated: boolean
   idCardNumber: string
   joiningDate: string
+  lastLogin: string
 }
 
 const emptyForm = {
@@ -47,13 +48,16 @@ export default function StaffManager() {
   const [credentials, setCredentials] = useState<any>(null)
   const [showTempPassword, setShowTempPassword] = useState(false)
 
+  // View Login Details
+  const [viewLoginDetails, setViewLoginDetails] = useState<Staff | null>(null)
+
   // ID Card
   const [selectedStaffForCard, setSelectedStaffForCard] = useState<Staff | null>(null)
   const idCardRef = useRef<HTMLDivElement>(null)
 
   // Print function
   const handlePrint = useReactToPrint({
-    contentRef: idCardRef,   // ✅ New API
+    contentRef: idCardRef,
     documentTitle: `${selectedStaffForCard?.name?.replace(/\s+/g, '_') || 'Staff'}_ID_Card`,
     pageStyle: `@page { size: 54mm 85mm; margin: 0; }`,
   })
@@ -131,6 +135,18 @@ export default function StaffManager() {
       fetchStaff()
     } catch (err: any) {
       alert(err?.response?.data?.message || 'Failed')
+    }
+  }
+
+  const handleResetPassword = async (id: string) => {
+    if (!confirm('Reset password for this staff member? A new temporary password will be generated.')) return
+    try {
+      const res = await api.put(`/staff/${id}/reset-password`)
+      alert(`✅ Password reset successful!\n\nNew temporary password: ${res.data.temporaryPassword}\n\nStaff ID: ${res.data.staffId || 'N/A'}`)
+      setViewLoginDetails(null)
+      fetchStaff()
+    } catch (err: any) {
+      alert(err?.response?.data?.message || 'Failed to reset password')
     }
   }
 
@@ -280,6 +296,7 @@ export default function StaffManager() {
 
               <div className="flex justify-center gap-2 mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button onClick={() => handleEdit(member)} className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30" title="Edit"><Edit2 size={14} /></button>
+                <button onClick={() => setViewLoginDetails(member)} className="p-2 rounded-lg bg-blue-500/20 text-blue-400 hover:bg-blue-500/30" title="View Login Details"><Eye size={14} /></button>
                 {!member.canLogin && (
                   <button onClick={() => handleGrantAccess(member._id)} className="p-2 rounded-lg bg-green-500/20 text-green-400 hover:bg-green-500/30" title="Grant Login"><Key size={14} /></button>
                 )}
@@ -290,6 +307,96 @@ export default function StaffManager() {
           ))}
         </div>
       )}
+
+      {/* View Login Details Modal */}
+      <AnimatePresence>
+        {viewLoginDetails && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+            onClick={() => setViewLoginDetails(null)}>
+            <motion.div initial={{ scale: 0.9 }} animate={{ scale: 1 }} exit={{ scale: 0.9 }}
+              className="bg-[#0f172a] border border-white/10 rounded-2xl p-6 w-full max-w-md"
+              onClick={e => e.stopPropagation()}>
+              
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  <Eye size={20} className="text-blue-400" /> Staff Login Details
+                </h2>
+                <button onClick={() => setViewLoginDetails(null)} className="p-2 rounded-lg hover:bg-white/10">
+                  <X size={20} />
+                </button>
+              </div>
+
+              {/* Staff Info */}
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center text-xl font-bold">
+                  {viewLoginDetails.name?.charAt(0) || '?'}
+                </div>
+                <div>
+                  <h3 className="font-bold text-white">{viewLoginDetails.name}</h3>
+                  <p className="text-sm text-blue-400">{viewLoginDetails.staffId}</p>
+                </div>
+              </div>
+
+              {/* Login Details */}
+              <div className="space-y-3 mb-6">
+                <div className="bg-white/5 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 mb-1">Staff ID</p>
+                  <p className="text-lg font-bold text-cyan-400">{viewLoginDetails.staffId}</p>
+                </div>
+
+                {viewLoginDetails.email && (
+                  <div className="bg-white/5 rounded-xl p-4">
+                    <p className="text-xs text-gray-500 mb-1">Email</p>
+                    <p className="text-white">{viewLoginDetails.email}</p>
+                  </div>
+                )}
+
+                <div className="bg-white/5 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 mb-1">Login Status</p>
+                  <span className={`text-sm px-3 py-1 rounded-full ${
+                    viewLoginDetails.canLogin 
+                      ? 'bg-green-500/20 text-green-400' 
+                      : 'bg-yellow-500/20 text-yellow-400'
+                  }`}>
+                    {viewLoginDetails.canLogin ? 'Can Login' : 'No Access'}
+                  </span>
+                </div>
+
+                <div className="bg-white/5 rounded-xl p-4">
+                  <p className="text-xs text-gray-500 mb-1">Last Login</p>
+                  <p className="text-white text-sm">
+                    {viewLoginDetails.lastLogin 
+                      ? new Date(viewLoginDetails.lastLogin).toLocaleString() 
+                      : 'Never logged in'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3">
+                {!viewLoginDetails.canLogin && (
+                  <button
+                    onClick={() => {
+                      handleGrantAccess(viewLoginDetails._id)
+                      setViewLoginDetails(null)
+                    }}
+                    className="flex-1 py-3 bg-green-500/20 border border-green-500/30 rounded-xl text-green-400 font-semibold hover:bg-green-500/30 transition-all"
+                  >
+                    Grant Login Access
+                  </button>
+                )}
+                <button
+                  onClick={() => handleResetPassword(viewLoginDetails._id)}
+                  className="flex-1 py-3 bg-orange-500/20 border border-orange-500/30 rounded-xl text-orange-400 font-semibold hover:bg-orange-500/30 transition-all flex items-center justify-center gap-2"
+                >
+                  <RefreshCw size={16} /> Reset Password
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* ID Card Modal */}
       <AnimatePresence>
