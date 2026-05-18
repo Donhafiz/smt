@@ -32,7 +32,7 @@ export default function StaffPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/staff')
+    fetch('https://smt-backend-amad.onrender.com/api/staff')
       .then(res => res.json())
       .then(data => setStaff(Array.isArray(data) ? data : []))
       .catch(console.error)

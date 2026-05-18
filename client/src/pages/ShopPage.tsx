@@ -31,7 +31,7 @@ export default function ShopPage() {
   const { addItem, items } = useCart()
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/products')
+    fetch('https://smt-backend-amad.onrender.com/api/products')
       .then(res => res.json())
       .then(data => setProducts(Array.isArray(data) ? data : []))
       .catch(console.error)

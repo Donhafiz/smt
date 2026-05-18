@@ -56,7 +56,7 @@ export default function ServicesPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/services')
+    fetch('https://smt-backend-amad.onrender.com/api/services')
       .then(res => res.json())
       .then(data => setServices(Array.isArray(data) ? data : []))
       .catch(console.error)
