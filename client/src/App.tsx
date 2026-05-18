@@ -60,13 +60,13 @@ function App() {
             <Route path="contact" element={<ContactPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
-            <Route path="shop" element={<ShopPage />} />
-            <Route path="cart" element={<CartPage />} />
-            <Route path="checkout" element={<CheckoutPage />} />
+            <Route path="shop" element={<ShopPage />} />  {/* Keep shop visible, but protect checkout */}
+            <Route path="cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+            <Route path="checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
             <Route path="training" element={<TrainingPage />} />
-            <Route path="training/:id" element={<CourseDetailPage />} />
+            <Route path="learning/:courseId" element={<ProtectedRoute><CoursePlayer /></ProtectedRoute>} />
             <Route path="learning/:courseId" element={<CoursePlayer />} />
-            <Route path="my-courses" element={<MyCoursesPage />} />  {/* ✅ NEW */}
+            <Route path="my-courses" element={<ProtectedRoute><MyCoursesPage /></ProtectedRoute>} />
             <Route path="consultancy" element={<ConsultancyPage />} />
             <Route path="software" element={<SoftwarePage />} />
             <Route path="payment-success" element={<PaymentSuccess />} />

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
-import { useTranslation } from 'react-i18next'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { 
   Search, ShoppingCart, Heart, Star, X, Plus, Minus,
@@ -20,7 +19,7 @@ interface Product {
 }
 
 export default function ShopPage() {
-  const { t } = useTranslation()
+  const navigate = useNavigate()
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [search, setSearch] = useState('')
@@ -50,7 +49,13 @@ export default function ShopPage() {
     setWishlist(prev => prev.includes(productId) ? prev.filter(id => id !== productId) : [...prev, productId])
   }
 
+  // ✅ Fixed: Require login before adding to cart
   const handleAddToCart = (product: Product) => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login')
+      return
+    }
     addItem({ ...product, quantity })
     setSelectedProduct(null)
     setQuantity(1)
@@ -180,7 +185,6 @@ export default function ShopPage() {
                 <X size={20} />
               </button>
               
-              {/* 3D-like rotation on hover */}
               <div className="h-56 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center mb-4 overflow-hidden group perspective-1000">
                 <motion.div
                   whileHover={{ rotateY: 15, rotateX: -5, scale: 1.05 }}

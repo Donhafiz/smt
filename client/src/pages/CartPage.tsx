@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { 
   ShoppingCart, Trash2, Plus, Minus, ArrowLeft, CreditCard, Truck, 
@@ -9,6 +9,7 @@ import {
 } from 'lucide-react'
 
 export default function CartPage() {
+  const navigate = useNavigate()
   const { items, removeItem, updateQuantity, total } = useCart()
   const [promoCode, setPromoCode] = useState('')
   const [promoApplied, setPromoApplied] = useState(false)
@@ -19,6 +20,14 @@ export default function CartPage() {
   const discount = promoApplied ? total * 0.1 : 0
   const finalTotal = total + delivery - discount
   const savings = discount + (total > 5000 ? 50 : 0)
+
+  // 🔒 Require login to access cart
+  useEffect(() => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login')
+    }
+  }, [navigate])
 
   const handleApplyPromo = () => {
     if (promoCode.toLowerCase() === 'smt10') { setPromoApplied(true) }
@@ -57,7 +66,6 @@ export default function CartPage() {
   return (
     <div className="min-h-screen bg-[#020617] text-white py-28 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-4xl font-black bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">
@@ -70,7 +78,6 @@ export default function CartPage() {
           </Link>
         </div>
 
-        {/* Free Shipping Progress */}
         {total < 5000 && (
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}
             className="glass rounded-2xl p-4 mb-6 flex items-center gap-4">
@@ -86,21 +93,16 @@ export default function CartPage() {
         )}
 
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             <AnimatePresence>
               {items.map((item: any) => (
                 <motion.div key={item.product?._id || Math.random()} layout initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20, height: 0 }}
                   className="glass rounded-2xl p-4 flex gap-4 group hover:border-white/10 transition-all">
-                  {/* Product Image */}
                   <div className="w-28 h-28 rounded-xl bg-gradient-to-br from-cyan-500/20 to-purple-500/20 flex items-center justify-center overflow-hidden flex-shrink-0 relative">
                     {item.product?.image ? (
                       <img src={item.product.image} alt={item.product.name} className="w-full h-full object-cover" />
                     ) : (
                       <ShoppingCart size={24} className="text-gray-600" />
-                    )}
-                    {item.product?.stock <= 5 && item.product?.stock > 0 && (
-                      <span className="absolute top-2 left-2 px-2 py-0.5 bg-red-500/80 rounded-full text-[10px]">Low Stock</span>
                     )}
                   </div>
 
@@ -109,12 +111,7 @@ export default function CartPage() {
                       <div>
                         <h3 className="font-semibold">{item.product?.name || 'Product'}</h3>
                         <p className="text-xs text-gray-500">{item.product?.category}</p>
-                        <div className="flex items-center gap-2 mt-2">
-                          <span className="text-lg font-bold text-cyan-400">GHS {(item.product?.price || 0).toLocaleString()}</span>
-                          {item.product?.originalPrice && (
-                            <span className="text-xs text-gray-500 line-through">GHS {item.product.originalPrice.toLocaleString()}</span>
-                          )}
-                        </div>
+                        <span className="text-lg font-bold text-cyan-400">GHS {(item.product?.price || 0).toLocaleString()}</span>
                       </div>
                       <button onClick={() => removeItem(item.product?._id)}
                         className="p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
@@ -145,7 +142,6 @@ export default function CartPage() {
               ))}
             </AnimatePresence>
 
-            {/* Saved for Later */}
             {savedItems.length > 0 && (
               <div className="pt-4">
                 <button onClick={() => setShowSaved(!showSaved)}
@@ -174,44 +170,29 @@ export default function CartPage() {
             )}
           </div>
 
-          {/* Order Summary */}
           <div className="lg:col-span-1">
             <div className="glass rounded-2xl p-6 sticky top-28 space-y-4">
               <h2 className="text-xl font-bold">Order Summary</h2>
-              
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between text-gray-400"><span>Subtotal ({items.length} items)</span><span>GHS {total.toLocaleString()}</span></div>
-                <div className="flex justify-between text-gray-400">
-                  <span>Delivery</span>
-                  <span>{delivery === 0 ? <span className="text-green-400">FREE</span> : `GHS ${delivery}`}</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-green-400"><span>Discount (10%)</span><span>-GHS {discount.toLocaleString()}</span></div>
-                )}
-                {savings > 0 && (
-                  <div className="flex justify-between text-yellow-400 text-xs"><span>You save</span><span>GHS {savings.toLocaleString()}</span></div>
-                )}
+                <div className="flex justify-between text-gray-400"><span>Delivery</span><span>{delivery === 0 ? <span className="text-green-400">FREE</span> : `GHS ${delivery}`}</span></div>
+                {discount > 0 && <div className="flex justify-between text-green-400"><span>Discount (10%)</span><span>-GHS {discount.toLocaleString()}</span></div>}
               </div>
 
-              {/* Promo Code */}
               <div className="flex gap-2">
                 <div className="relative flex-1">
                   <Tag size={14} className="absolute left-3 top-3 text-gray-500" />
                   <input type="text" placeholder="Promo code" value={promoCode} onChange={e => setPromoCode(e.target.value)}
                     className="w-full pl-9 pr-3 py-2.5 bg-white/5 border border-white/10 rounded-lg text-sm focus:outline-none focus:border-cyan-400" />
                 </div>
-                <button onClick={handleApplyPromo}
-                  className="px-4 py-2.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30 font-medium">Apply</button>
+                <button onClick={handleApplyPromo} className="px-4 py-2.5 bg-cyan-500/20 text-cyan-400 rounded-lg text-sm hover:bg-cyan-500/30 font-medium">Apply</button>
               </div>
-              <p className="text-[10px] text-gray-600 -mt-2">Try: SMT10 for 10% off</p>
 
               <div className="border-t border-white/10 pt-3 flex justify-between font-bold text-lg">
-                <span>Total</span>
-                <span className="text-cyan-400">GHS {finalTotal.toLocaleString()}</span>
+                <span>Total</span><span className="text-cyan-400">GHS {finalTotal.toLocaleString()}</span>
               </div>
 
-              <Link to="/checkout"
-                className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-xl shadow-cyan-500/20">
+              <Link to="/checkout" className="w-full py-3.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl font-semibold text-lg flex items-center justify-center gap-2 hover:scale-[1.02] transition-all shadow-xl shadow-cyan-500/20">
                 <CreditCard size={20} /> Proceed to Checkout
               </Link>
 
@@ -220,29 +201,7 @@ export default function CartPage() {
                 <div className="flex items-center gap-2"><RefreshCw size={12} className="text-green-400" /> 7-day easy returns</div>
                 <div className="flex items-center gap-2"><BadgeCheck size={12} className="text-green-400" /> Authentic products guaranteed</div>
               </div>
-
-              {/* Accepted Payments */}
-              <div className="pt-3 border-t border-white/10 flex items-center gap-2 justify-center text-xs text-gray-600">
-                <span>We accept:</span>
-                <span>💳</span><span>📱</span><span>🏦</span><span>💵</span>
-              </div>
             </div>
-          </div>
-        </div>
-
-        {/* You Might Also Like */}
-        <div className="mt-16">
-          <h3 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <Sparkles size={20} className="text-yellow-400" /> You Might Also Like
-          </h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {['🎧 Wireless Earbuds', '⌚ Smart Watch', '💻 Laptop Stand', '🔌 USB-C Hub'].map((item, i) => (
-              <div key={i} className="glass rounded-xl p-4 text-center hover:border-white/10 cursor-pointer transition-all">
-                <div className="text-3xl mb-2">{item.split(' ')[0]}</div>
-                <p className="text-sm text-gray-400">{item.split(' ').slice(1).join(' ')}</p>
-                <p className="text-cyan-400 font-bold mt-2">GHS {((i + 1) * 500).toLocaleString()}</p>
-              </div>
-            ))}
           </div>
         </div>
       </div>
