@@ -32,7 +32,7 @@ import aiRequestRoutes from './routes/aiRequestRoutes.js'
 import aiChatRoutes from './routes/aiChatRoutes.js'
 import productRoutes from './routes/productRoutes.js'
 import staffPortalRoutes from './routes/staffPortalRoutes.js'
-
+import lmsRoutes from './routes/lmsRoutes.js'
 const app = express()
 
 // ========================
@@ -70,7 +70,7 @@ app.use('/api/vendor', vendorRoutes)           // ✅ Vendor register/login is P
 app.use('/api/ai-requests', aiRequestRoutes)
 app.use('/api/ai-chat', aiChatRoutes)
 app.use('/api/staff-portal', staffPortalRoutes)
-
+app.use('/api/lms', lmsRoutes)
 // ========================
 // PROTECTED ROUTES (AUTH REQUIRED)
 // ========================

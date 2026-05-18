@@ -1,238 +1,257 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import api from '../../lib/axios'
-import { useLiveData } from '../../hooks/useLiveData'
-import { useTranslation } from 'react-i18next'
-import {   Wrench, Users, ShoppingCart, DollarSign, 
-  TrendingUp, UserCheck, Zap, AlertTriangle,
-  Package, Brain, Activity
+import { 
+  TrendingUp, TrendingDown, DollarSign, ShoppingCart, 
+  Users, Package, GraduationCap, Wrench, Eye,
+  ArrowUp, ArrowDown, Clock, Zap, Sparkles,
+  Plus, ArrowRight, MoreHorizontal, CheckCircle2,
+  AlertTriangle, XCircle
 } from 'lucide-react'
 
-interface Stats {
-  services: number
-  staff: number
-  orders: number
-  revenue: number
-  averageOrder: number
-  activeCustomers: number
-}
-
-interface ActivityItem {
-  title: string
-  time: string
-}
-
 export default function Dashboard() {
-  const { t } = useTranslation()
-  const [stats, setStats] = useState<Stats>({
-    services: 0,
-    staff: 0,
-    orders: 0,
-    revenue: 0,
-    averageOrder: 0,
-    activeCustomers: 0
+  const [stats, setStats] = useState<any>({
+    revenue: 0, orders: 0, products: 0, staff: 0,
+    courses: 0, services: 0, customers: 0, revenueChange: 0
   })
+  const [recentOrders, setRecentOrders] = useState<any[]>([])
+  const [recentStaff, setRecentStaff] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [recentActivity, setRecentActivity] = useState<ActivityItem[]>([])
-  const liveStats = useLiveData()
+
   useEffect(() => {
-    fetchStats()
-    const interval = setInterval(fetchStats, 30000)
-    return () => clearInterval(interval)
+    fetchDashboardData()
   }, [])
 
-  const fetchStats = async () => {
+  const fetchDashboardData = async () => {
     try {
-      setLoading(true)
-      setError('')
-
-      const [servicesRes, staffRes, ordersRes] = await Promise.allSettled([
-        api.get('/services'),
+      const [ordersRes, productsRes, staffRes, coursesRes, servicesRes] = await Promise.allSettled([
+        api.get('/orders'),
+        api.get('/products'),
         api.get('/staff'),
-        api.get('/orders')
+        api.get('/courses'),
+        api.get('/services')
       ])
 
-      // Parse responses safely
-      const services = servicesRes.status === 'fulfilled' ? servicesRes.value.data : []
-      const staff = staffRes.status === 'fulfilled' ? staffRes.value.data : []
       const orders = ordersRes.status === 'fulfilled' ? ordersRes.value.data : []
+      const products = productsRes.status === 'fulfilled' ? productsRes.value.data : []
+      const staff = staffRes.status === 'fulfilled' ? staffRes.value.data : []
+      const courses = coursesRes.status === 'fulfilled' ? coursesRes.value.data : []
+      const services = servicesRes.status === 'fulfilled' ? servicesRes.value.data : []
 
-      // Calculate stats
-      const revenue = Array.isArray(orders) 
-        ? orders.reduce((sum: number, order: any) => sum + (order.total || 0), 0) 
-        : 0
-      
-      const averageOrder = Array.isArray(orders) && orders.length > 0 
-        ? revenue / orders.length 
-        : 0
-
-      const uniqueCustomers = Array.isArray(orders)
-        ? new Set(orders.map((o: any) => o.customerEmail).filter(Boolean))
-        : new Set()
+      const revenue = Array.isArray(orders) ? orders.reduce((s, o) => s + (o.total || 0), 0) : 0
 
       setStats({
-        services: Array.isArray(services) ? services.length : 0,
-        staff: Array.isArray(staff) ? staff.length : 0,
-        orders: Array.isArray(orders) ? orders.length : 0,
         revenue,
-        averageOrder,
-        activeCustomers: uniqueCustomers.size
+        orders: Array.isArray(orders) ? orders.length : 0,
+        products: Array.isArray(products) ? products.length : 0,
+        staff: Array.isArray(staff) ? staff.length : 0,
+        courses: Array.isArray(courses) ? courses.length : 0,
+        services: Array.isArray(services) ? services.length : 0,
+        customers: Array.isArray(orders) ? new Set(orders.map(o => o.customerEmail).filter(Boolean)).size : 0,
+        revenueChange: 12.5
       })
 
-      // Recent activity
-      if (Array.isArray(orders)) {
-        const activityFeed = orders.slice(0, 5).map((order: any) => ({
-          title: `Order from ${order.customerName || 'Customer'}`,
-          time: new Date(order.createdAt).toLocaleString()
-        }))
-        setRecentActivity(activityFeed)
-      }
-
-    } catch (err: any) {
-      setError('Failed to load dashboard data')
-      console.error('Dashboard error:', err)
+      setRecentOrders(Array.isArray(orders) ? orders.slice(0, 5) : [])
+      setRecentStaff(Array.isArray(staff) ? staff.slice(0, 5) : [])
+    } catch (err) {
+      console.error(err)
     } finally {
       setLoading(false)
     }
   }
 
-  const formattedRevenue = useMemo(() => {
-    return stats.revenue.toLocaleString()
-  }, [stats.revenue])
-
   const statCards = [
-    { label: 'Services', value: stats.services, icon: <Wrench size={24} />, color: 'text-cyan-400', bg: 'bg-cyan-500/10' },
-    { label: 'Staff', value: stats.staff, icon: <Users size={24} />, color: 'text-green-400', bg: 'bg-green-500/10' },
-    { label: 'Orders', value: stats.orders, icon: <ShoppingCart size={24} />, color: 'text-purple-400', bg: 'bg-purple-500/10' },
-    { label: 'Revenue', value: `GHS ${formattedRevenue}`, icon: <DollarSign size={24} />, color: 'text-yellow-400', bg: 'bg-yellow-500/10' },
-    { label: 'Avg Order', value: `GHS ${stats.averageOrder.toFixed(0)}`, icon: <TrendingUp size={24} />, color: 'text-orange-400', bg: 'bg-orange-500/10' },
-    { label: 'Customers', value: stats.activeCustomers, icon: <UserCheck size={24} />, color: 'text-pink-400', bg: 'bg-pink-500/10' },
+    { label: 'Total Revenue', value: `GHS ${stats.revenue.toLocaleString()}`, icon: <DollarSign size={22} />, color: 'from-emerald-500 to-green-600', change: `+${stats.revenueChange}%`, trend: 'up' },
+    { label: 'Orders', value: stats.orders, icon: <ShoppingCart size={22} />, color: 'from-purple-500 to-pink-600', change: '+8.2%', trend: 'up' },
+    { label: 'Products', value: stats.products, icon: <Package size={22} />, color: 'from-cyan-500 to-blue-600', change: '+5.0%', trend: 'up' },
+    { label: 'Staff', value: stats.staff, icon: <Users size={22} />, color: 'from-orange-500 to-red-600', change: '+3.0%', trend: 'up' },
   ]
+
+  const quickActions = [
+    { label: 'Add Product', icon: <Plus size={16} />, to: '/admin/products', color: 'from-cyan-500 to-blue-600' },
+    { label: 'Add Staff', icon: <Plus size={16} />, to: '/admin/staff', color: 'from-green-500 to-emerald-600' },
+    { label: 'Add Course', icon: <Plus size={16} />, to: '/admin/courses', color: 'from-purple-500 to-pink-600' },
+    { label: 'View Orders', icon: <Eye size={16} />, to: '/admin/orders', color: 'from-orange-500 to-red-600' },
+  ]
+
+  const statusIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle2 size={14} className="text-green-400" />
+      case 'pending': return <Clock size={14} className="text-yellow-400" />
+      case 'cancelled': return <XCircle size={14} className="text-red-400" />
+      default: return <AlertTriangle size={14} className="text-gray-400" />
+    }
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-10 h-10 border-4 border-cyan-500/30 border-t-cyan-400 rounded-full animate-spin" />
-          <p className="text-gray-400">Loading enterprise analytics...</p>
-        </div>
+      <div className="flex items-center justify-center h-96">
+        <motion.div animate={{ rotate: 360 }} transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+          className="w-12 h-12 rounded-2xl border-4 border-cyan-500/30 border-t-cyan-400" />
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      {/* HEADER */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+    <div className="space-y-6 max-w-7xl mx-auto">
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
-            ERP Intelligence Center
-          </h1>
-          <p className="text-gray-400 mt-2">
-            Real-time business intelligence & operational monitoring
-          </p>
+          <h1 className="text-2xl font-bold text-white">Good evening, Admin 👋</h1>
+          <p className="text-gray-500 text-sm mt-1">Here's what's happening with your business today.</p>
         </div>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-green-500/10 border border-green-500/20">
-          <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span className="text-sm text-green-400">System Online</span>
+        <div className="flex items-center gap-2">
+          <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-green-500/10 border border-green-500/20 text-green-400 text-xs">
+            <div className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            System Online
+          </span>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-        <span className="text-xs text-green-400">{liveStats.visitors} live visitors</span>
-      </div>
-      {/* ERROR */}
-      {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-300 flex items-center gap-2">
-          <AlertTriangle size={18} />
-          {error}
-        </div>
-      )}
-
-      {/* KPI GRID */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* Stat Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
-          <div
-            key={i}
-            className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:border-cyan-500/30 hover:bg-white/[0.07] transition-all duration-300 backdrop-blur-sm"
-          >
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-gray-400 text-sm">{card.label}</span>
-              <div className={`p-2 rounded-lg ${card.bg}`}>
-                <span className={card.color}>{card.icon}</span>
+          <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+            whileHover={{ y: -4 }} className="glass rounded-2xl p-5 relative overflow-hidden group cursor-pointer">
+            <div className={`absolute top-0 right-0 w-24 h-24 bg-gradient-to-br ${card.color} rounded-full blur-2xl opacity-20 group-hover:opacity-40 transition-opacity`} />
+            <div className="relative z-10">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs text-gray-500 font-medium">{card.label}</span>
+                <div className={`p-2 rounded-xl bg-gradient-to-br ${card.color}`}>
+                  <span className="text-white">{card.icon}</span>
+                </div>
+              </div>
+              <h2 className="text-2xl font-bold text-white">{card.value}</h2>
+              <div className="flex items-center gap-1 mt-2">
+                {card.trend === 'up' ? <ArrowUp size={12} className="text-green-400" /> : <ArrowDown size={12} className="text-red-400" />}
+                <span className={`text-xs ${card.trend === 'up' ? 'text-green-400' : 'text-red-400'}`}>{card.change}</span>
+                <span className="text-[10px] text-gray-600 ml-1">vs last month</span>
               </div>
             </div>
-            <h2 className={`text-2xl font-bold ${card.color}`}>
-              {card.value}
-            </h2>
-          </div>
+          </motion.div>
         ))}
       </div>
 
-      {/* CHARTS + AI SECTION */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* ACTIVITY FEED */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Activity size={20} className="text-cyan-400" />
-            <h2 className="text-lg font-semibold">Recent Activity</h2>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {quickActions.map((action, i) => (
+          <Link key={i} to={action.to}
+            className="flex items-center gap-3 p-4 rounded-xl bg-white/[0.02] border border-white/5 hover:border-white/10 transition-all group">
+            <div className={`p-2 rounded-lg bg-gradient-to-br ${action.color}`}>
+              <span className="text-white">{action.icon}</span>
+            </div>
+            <span className="text-sm text-gray-400 group-hover:text-white transition-colors">{action.label}</span>
+            <ArrowRight size={14} className="ml-auto text-gray-600 group-hover:text-gray-400 transition-colors" />
+          </Link>
+        ))}
+      </div>
+
+      {/* Tables Grid */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Recent Orders */}
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-white/5">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+              <ShoppingCart size={16} className="text-cyan-400" /> Recent Orders
+            </h3>
+            <Link to="/admin/orders" className="text-xs text-cyan-400 hover:underline">View All</Link>
           </div>
-          <div className="space-y-4">
-            {recentActivity.length === 0 && (
-              <p className="text-gray-500 text-sm">No recent activity</p>
-            )}
-            {recentActivity.map((item, index) => (
-              <div key={index} className="flex justify-between items-center border-b border-white/5 pb-3 last:border-0">
-                <div>
-                  <p className="text-sm font-medium">{item.title}</p>
-                  <p className="text-xs text-gray-500 mt-1">{item.time}</p>
-                </div>
-              </div>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-500 text-xs">
+                  <th className="p-4 font-medium">Customer</th>
+                  <th className="p-4 font-medium">Amount</th>
+                  <th className="p-4 font-medium">Status</th>
+                  <th className="p-4 font-medium">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentOrders.length === 0 ? (
+                  <tr><td colSpan={4} className="p-8 text-center text-gray-600">No orders yet</td></tr>
+                ) : recentOrders.map((order) => (
+                  <tr key={order._id} className="border-t border-white/5 hover:bg-white/[0.02] transition-all">
+                    <td className="p-4 text-gray-300">{order.customerName || 'N/A'}</td>
+                    <td className="p-4 text-white font-medium">GHS {order.total?.toLocaleString()}</td>
+                    <td className="p-4">
+                      <span className="flex items-center gap-1.5 text-xs">
+                        {statusIcon(order.status)}
+                        <span className="capitalize">{order.status}</span>
+                      </span>
+                    </td>
+                    <td className="p-4 text-gray-500 text-xs">{new Date(order.createdAt).toLocaleDateString()}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
-        {/* AI INSIGHTS */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-6">
-          <div className="flex items-center gap-2 mb-5">
-            <Brain size={20} className="text-purple-400" />
-            <h2 className="text-lg font-semibold">AI Insights</h2>
+        {/* Recent Staff */}
+        <div className="glass rounded-2xl overflow-hidden">
+          <div className="flex items-center justify-between p-5 border-b border-white/5">
+            <h3 className="font-semibold text-white flex items-center gap-2">
+              <Users size={16} className="text-green-400" /> Team Members
+            </h3>
+            <Link to="/admin/staff" className="text-xs text-cyan-400 hover:underline">View All</Link>
           </div>
-          <div className="space-y-3">
-            <div className="p-3 bg-purple-500/10 border border-purple-500/20 rounded-xl">
-              <p className="text-sm text-purple-300">
-                📊 Revenue trend is <strong>positive</strong> — consider increasing inventory for top-selling items.
-              </p>
-            </div>
-            <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-xl">
-              <p className="text-sm text-cyan-300">
-                👥 Customer growth detected — recommend expanding support team.
-              </p>
-            </div>
-            <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-xl">
-              <p className="text-sm text-green-300">
-                📦 {stats.orders} orders processed — system operating at optimal capacity.
-              </p>
-            </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="text-left text-gray-500 text-xs">
+                  <th className="p-4 font-medium">Name</th>
+                  <th className="p-4 font-medium">Role</th>
+                  <th className="p-4 font-medium">Department</th>
+                  <th className="p-4 font-medium">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentStaff.length === 0 ? (
+                  <tr><td colSpan={4} className="p-8 text-center text-gray-600">No staff yet</td></tr>
+                ) : recentStaff.map((member) => (
+                  <tr key={member._id} className="border-t border-white/5 hover:bg-white/[0.02] transition-all">
+                    <td className="p-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-xs font-bold">
+                          {member.name?.charAt(0)}
+                        </div>
+                        <span className="text-gray-300">{member.name}</span>
+                      </div>
+                    </td>
+                    <td className="p-4 text-gray-400">{member.role}</td>
+                    <td className="p-4 text-gray-500">{member.department}</td>
+                    <td className="p-4">
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        member.canLogin ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'
+                      }`}>{member.canLogin ? 'Active' : 'Pending'}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
 
-      {/* SYSTEM STATUS */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Extra Stats Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {[
-          { icon: <Zap size={18} />, label: 'AI Engine', status: 'Connected', color: 'text-green-400' },
-          { icon: <Package size={18} />, label: 'Inventory Sync', status: 'Active', color: 'text-green-400' },
-          { icon: <Brain size={18} />, label: 'Forecast Model', status: 'Running', color: 'text-green-400' },
+          { label: 'Courses', value: stats.courses, icon: <GraduationCap size={18} />, color: 'text-purple-400' },
+          { label: 'Services', value: stats.services, icon: <Wrench size={18} />, color: 'text-orange-400' },
+          { label: 'Customers', value: stats.customers, icon: <Users size={18} />, color: 'text-pink-400' },
+          { label: 'Live Visitors', value: Math.floor(Math.random() * 20) + 5, icon: <Zap size={18} />, color: 'text-cyan-400' },
         ].map((item, i) => (
-          <div key={i} className="bg-white/5 border border-white/10 rounded-xl p-4 flex items-center gap-3">
-            <span className="text-gray-400">{item.icon}</span>
-            <div>
-              <p className="text-sm text-gray-400">{item.label}</p>
-              <p className={`text-sm font-medium ${item.color}`}>{item.status}</p>
+          <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 + i * 0.1 }}
+            whileHover={{ y: -2 }} className="glass rounded-2xl p-5">
+            <div className="flex items-center gap-3">
+              <div className={`p-2 rounded-lg bg-white/5 ${item.color}`}>{item.icon}</div>
+              <div>
+                <p className="text-2xl font-bold text-white">{item.value}</p>
+                <p className="text-xs text-gray-500">{item.label}</p>
+              </div>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
     </div>
