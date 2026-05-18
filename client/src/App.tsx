@@ -44,6 +44,8 @@ import AdminRoutes from './routes/AdminRoutes'
 import ProtectedRoute from './components/ProtectedRoute'
 import NotFoundPage from './pages/NotFoundPage'
 import CourseDetailPage from './pages/CourseDetailPage'
+import CoursePlayer from './pages/learning/CoursePlayer'
+import MyCoursesPage from './pages/learning/MyCoursesPage'
 
 function App() {
   return (
@@ -63,6 +65,8 @@ function App() {
             <Route path="checkout" element={<CheckoutPage />} />
             <Route path="training" element={<TrainingPage />} />
             <Route path="training/:id" element={<CourseDetailPage />} />
+            <Route path="learning/:courseId" element={<CoursePlayer />} />
+            <Route path="my-courses" element={<MyCoursesPage />} />  {/* ✅ NEW */}
             <Route path="consultancy" element={<ConsultancyPage />} />
             <Route path="software" element={<SoftwarePage />} />
             <Route path="payment-success" element={<PaymentSuccess />} />

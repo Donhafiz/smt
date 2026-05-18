@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -31,7 +31,6 @@ const getRating = (id: string) => {
   return MOCK_RATINGS[id]
 }
 
-// ── Skeleton card ─────────────────────────────────────────────────────────
 function SkeletonCard() {
   return (
     <div className="rounded-2xl overflow-hidden animate-pulse" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)' }}>
@@ -47,7 +46,6 @@ function SkeletonCard() {
   )
 }
 
-// ── Course card ────────────────────────────────────────────────────────────
 function CourseCard({ course, index, onClick }: { course: Course; index: number; onClick: () => void }) {
   const cfg = LEVEL_CONFIG[course.level] ?? LEVEL_CONFIG.Beginner
   const rating = getRating(course._id)
@@ -64,13 +62,11 @@ function CourseCard({ course, index, onClick }: { course: Course; index: number;
       onMouseEnter={e => (e.currentTarget.style.borderColor = 'rgba(167,139,250,0.3)')}
       onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(255,255,255,0.06)')}>
 
-      {/* Banner */}
       <div className="relative h-40 overflow-hidden"
         style={{ background: 'linear-gradient(135deg, rgba(167,139,250,0.15), rgba(6,182,212,0.15))' }}>
         <div className="absolute inset-0 flex items-center justify-center">
           <BookOpen size={48} style={{ color: 'rgba(167,139,250,0.3)' }} />
         </div>
-        {/* Play overlay */}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300"
           style={{ background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }}>
           <div className="w-12 h-12 rounded-full flex items-center justify-center"
@@ -78,20 +74,17 @@ function CourseCard({ course, index, onClick }: { course: Course; index: number;
             <Play size={18} fill="white" className="text-white ml-0.5" />
           </div>
         </div>
-        {/* Level badge */}
-        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold font-body uppercase tracking-wider"
+        <div className="absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider"
           style={{ background: cfg.bg, border: `1px solid ${cfg.border}`, color: cfg.color }}>
           {course.level}
         </div>
-        {/* Category */}
-        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-body font-semibold"
+        <div className="absolute top-3 right-3 px-2.5 py-1 rounded-full text-[10px] font-semibold"
           style={{ background: 'rgba(0,0,0,0.5)', color: '#94a3b8', border: '1px solid rgba(255,255,255,0.1)' }}>
           {course.category}
         </div>
       </div>
 
       <div className="p-5">
-        {/* Rating row */}
         <div className="flex items-center gap-2 mb-3">
           <div className="flex items-center gap-0.5">
             {[1,2,3,4,5].map(s => (
@@ -99,49 +92,52 @@ function CourseCard({ course, index, onClick }: { course: Course; index: number;
                 style={{ color: s <= Math.round(rating) ? '#f59e0b' : '#374151' }} />
             ))}
           </div>
-          <span className="font-body text-[11px] text-slate-500">{rating.toFixed(1)}</span>
-          <span className="font-body text-[11px] text-slate-600">·</span>
-          <span className="font-body text-[11px] text-slate-600 flex items-center gap-1"><Users size={9} />{enrolled}</span>
+          <span className="text-[11px] text-slate-500">{rating.toFixed(1)}</span>
+          <span className="text-[11px] text-slate-600">·</span>
+          <span className="text-[11px] text-slate-600 flex items-center gap-1"><Users size={9} />{enrolled}</span>
         </div>
 
-        <h3 className="font-display font-bold text-white mb-2 leading-tight group-hover:text-purple-300 transition-colors"
-          style={{ fontSize: '1rem' }}>
+        <h3 className="font-bold text-white mb-2 leading-tight group-hover:text-purple-300 transition-colors text-base">
           {course.title}
         </h3>
-        <p className="font-body text-slate-500 text-xs leading-relaxed mb-4 line-clamp-2">{course.description}</p>
+        <p className="text-slate-500 text-xs leading-relaxed mb-4 line-clamp-2">{course.description}</p>
 
-        {/* Meta row */}
-        <div className="flex items-center gap-3 text-xs text-slate-600 font-body mb-5">
+        <div className="flex items-center gap-3 text-xs text-slate-600 mb-5">
           <span className="flex items-center gap-1"><Clock size={11} /> {course.duration}</span>
           <span className="flex items-center gap-1"><GraduationCap size={11} /> {course.instructor || 'Expert'}</span>
         </div>
 
-        {/* Bottom CTA */}
         <div className="flex items-center justify-between">
           <div>
-            <p className="font-body text-[10px] text-slate-600 uppercase tracking-wider mb-0.5">Price</p>
-            <p className="font-display font-black text-white text-lg">
+            <p className="text-[10px] text-slate-600 uppercase tracking-wider mb-0.5">Price</p>
+            <p className="font-black text-white text-lg">
               GHS {course.price?.toLocaleString()}
             </p>
           </div>
-          <div className="flex items-center gap-1.5 text-purple-400 text-xs font-body font-semibold group-hover:gap-2 transition-all">
-            Enrol Now <ArrowRight size={13} />
-          </div>
+          {/* ✅ ENROLL NOW — Redirects to Learning Platform */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onClick()
+            }}
+            className="flex items-center gap-1.5 text-purple-400 text-xs font-semibold group-hover:gap-2 transition-all bg-purple-500/10 px-4 py-2 rounded-xl hover:bg-purple-500/20 border border-purple-500/20"
+          >
+            Enroll Now <ArrowRight size={13} />
+          </button>
         </div>
       </div>
     </motion.div>
   )
 }
 
-// ══════════════════════════════════════════════════════════════════════════
 export default function TrainingPage() {
   const navigate = useNavigate()
-  const [courses, setCourses]           = useState<Course[]>([])
-  const [loading, setLoading]           = useState(true)
-  const [search, setSearch]             = useState('')
-  const [activeLevel, setActiveLevel]   = useState('All')
+  const [courses, setCourses] = useState<Course[]>([])
+  const [loading, setLoading] = useState(true)
+  const [search, setSearch] = useState('')
+  const [activeLevel, setActiveLevel] = useState('All')
   const [activeCategory, setActiveCategory] = useState('All')
-  const [showFilters, setShowFilters]   = useState(false)
+  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     fetch('https://smt-backend-amad.onrender.com/api/courses')
@@ -152,7 +148,7 @@ export default function TrainingPage() {
   }, [])
 
   const categories = ['All', ...new Set(courses.map(c => c.category).filter(Boolean))]
-  const levels     = ['All', 'Beginner', 'Intermediate', 'Advanced']
+  const levels = ['All', 'Beginner', 'Intermediate', 'Advanced']
 
   const filtered = courses.filter(c => {
     const s = c.title?.toLowerCase().includes(search.toLowerCase())
@@ -163,25 +159,19 @@ export default function TrainingPage() {
 
   const stats = [
     { icon: BookOpen, value: `${courses.length}+`, label: 'Courses' },
-    { icon: Users,    value: '500+',               label: 'Students' },
-    { icon: Award,    value: '100%',               label: 'Certified' },
-    { icon: Globe,    value: 'Online',              label: 'Access' },
+    { icon: Users, value: '500+', label: 'Students' },
+    { icon: Award, value: '100%', label: 'Certified' },
+    { icon: Globe, value: 'Online', label: 'Access' },
   ]
 
   return (
-    <div className="min-h-screen text-white" style={{ background: '#020617', fontFamily: 'DM Sans, sans-serif' }}>
+    <div className="min-h-screen text-white" style={{ background: '#020617' }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800;12..96,900&family=DM+Sans:wght@300;400;500;600&display=swap');
-        .font-display { font-family: 'Bricolage Grotesque', sans-serif; }
-        .font-body { font-family: 'DM Sans', sans-serif; }
-        .cat-pill { transition: all 0.2s; cursor: pointer; border: 1px solid transparent; font-family: 'DM Sans', sans-serif; }
-        .cat-pill.active { background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.4); color: #a78bfa; }
-        .cat-pill:not(.active) { background: rgba(255,255,255,0.03); border-color: rgba(255,255,255,0.07); color: #64748b; }
-        .cat-pill:not(.active):hover { color: #fff; background: rgba(255,255,255,0.06); }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&display=swap');
         .line-clamp-2 { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
       `}</style>
 
-      {/* ── HERO ─────────────────────────────────────────────────────── */}
+      {/* Hero */}
       <section className="relative pt-28 pb-16 px-6 overflow-hidden">
         <div className="absolute inset-0 pointer-events-none">
           <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full opacity-20"
@@ -191,34 +181,31 @@ export default function TrainingPage() {
         </div>
 
         <div className="relative max-w-5xl mx-auto text-center">
-          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full font-body text-xs mb-6 uppercase tracking-widest font-semibold"
+          <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs mb-6 uppercase tracking-widest font-semibold"
             style={{ background: 'rgba(167,139,250,0.08)', border: '1px solid rgba(167,139,250,0.2)', color: '#a78bfa' }}>
             <GraduationCap size={13} /> {courses.length} Courses Available
           </motion.div>
 
-          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="font-display font-black leading-none mb-4"
-            style={{ fontSize: 'clamp(2.5rem, 7vw, 6rem)' }}>
+          <motion.h1 initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}
+            className="font-black leading-none mb-4 text-5xl md:text-7xl">
             <span className="text-white">IT Training</span>{' '}
             <span style={{ background: 'linear-gradient(135deg, #a78bfa, #ec4899)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
               School
             </span>
           </motion.h1>
 
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.25 }}
-            className="font-body text-slate-400 max-w-xl mx-auto leading-relaxed mb-10"
-            style={{ fontSize: '1.1rem' }}>
-            Professional IT courses with mentorship and certification from industry experts shaping Africa's digital talent.
+          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}
+            className="text-slate-400 max-w-xl mx-auto leading-relaxed mb-10 text-lg">
+            Professional IT courses with mentorship and certification from industry experts.
           </motion.p>
 
-          {/* Stats row */}
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
             className="flex flex-wrap items-center justify-center gap-4">
             {stats.map((s, i) => {
               const Icon = s.icon
               return (
-                <div key={i} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl font-body"
+                <div key={i} className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl"
                   style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)' }}>
                   <Icon size={14} style={{ color: '#a78bfa' }} />
                   <span className="text-white font-semibold text-sm">{s.value}</span>
@@ -230,19 +217,16 @@ export default function TrainingPage() {
         </div>
       </section>
 
-      {/* ── FILTERS ──────────────────────────────────────────────────── */}
+      {/* Filters */}
       <section className="px-6 max-w-7xl mx-auto mb-10">
         <div className="rounded-2xl p-4 space-y-4" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
-          {/* Search row */}
           <div className="flex gap-3">
             <div className="relative flex-1">
               <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-600" />
               <input type="text" placeholder="Search courses…" value={search}
                 onChange={e => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl font-body text-sm text-white placeholder-slate-600 outline-none transition-all"
-                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
-                onFocus={e => (e.target.style.borderColor = 'rgba(167,139,250,0.5)')}
-                onBlur={e => (e.target.style.borderColor = 'rgba(255,255,255,0.07)')} />
+                className="w-full pl-11 pr-4 py-3 rounded-xl text-sm text-white placeholder-slate-600 outline-none transition-all"
+                style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }} />
               {search && (
                 <button onClick={() => setSearch('')} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600 hover:text-white">
                   <X size={14} />
@@ -250,7 +234,7 @@ export default function TrainingPage() {
               )}
             </div>
             <button onClick={() => setShowFilters(p => !p)}
-              className="px-4 py-3 rounded-xl font-body text-sm font-medium flex items-center gap-2 transition-all"
+              className="px-4 py-3 rounded-xl text-sm font-medium flex items-center gap-2 transition-all"
               style={{
                 background: showFilters ? 'rgba(167,139,250,0.15)' : 'rgba(255,255,255,0.04)',
                 border: `1px solid ${showFilters ? 'rgba(167,139,250,0.4)' : 'rgba(255,255,255,0.07)'}`,
@@ -260,26 +244,27 @@ export default function TrainingPage() {
             </button>
           </div>
 
-          {/* Level tabs — always visible */}
           <div className="flex flex-wrap gap-2">
             {levels.map(l => (
               <button key={l} onClick={() => setActiveLevel(l)}
-                className={`cat-pill px-4 py-2 rounded-xl text-xs font-semibold ${activeLevel === l ? 'active' : ''}`}>
+                className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                  activeLevel === l ? 'bg-purple-500/15 border border-purple-500/40 text-purple-400' : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
+                }`}>
                 {l}
               </button>
             ))}
           </div>
 
-          {/* Category tabs — shown when filters open */}
           <AnimatePresence>
             {showFilters && (
-              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
-                <p className="font-body text-[10px] uppercase tracking-widest text-slate-600 mb-2 font-semibold">Category</p>
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                <p className="text-[10px] uppercase tracking-widest text-slate-600 mb-2 font-semibold">Category</p>
                 <div className="flex flex-wrap gap-2">
                   {categories.map(c => (
                     <button key={c} onClick={() => setActiveCategory(c)}
-                      className={`cat-pill px-4 py-2 rounded-xl text-xs font-semibold ${activeCategory === c ? 'active' : ''}`}>
+                      className={`px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+                        activeCategory === c ? 'bg-purple-500/15 border border-purple-500/40 text-purple-400' : 'bg-white/5 border border-white/10 text-slate-400 hover:text-white'
+                      }`}>
                       {c}
                     </button>
                   ))}
@@ -289,41 +274,30 @@ export default function TrainingPage() {
           </AnimatePresence>
         </div>
 
-        {/* Results count */}
         {!loading && (
-          <p className="font-body text-xs text-slate-600 mt-3">
+          <p className="text-xs text-slate-600 mt-3">
             {filtered.length} course{filtered.length !== 1 ? 's' : ''} found
-            {search && <> for "<span className="text-purple-400">{search}</span>"</>}
           </p>
         )}
       </section>
 
-      {/* ── GRID ─────────────────────────────────────────────────────── */}
+      {/* Courses Grid */}
       <section className="px-6 max-w-7xl mx-auto pb-24">
         {loading ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {Array(6).fill(0).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         ) : filtered.length === 0 ? (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center py-24 text-center">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center mb-4"
-              style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
-              <BookOpen size={28} className="text-slate-600" />
-            </div>
-            <p className="font-display font-bold text-white text-xl mb-2">No courses found</p>
-            <p className="font-body text-slate-500 text-sm">Try adjusting your filters or search term.</p>
-            <button onClick={() => { setSearch(''); setActiveLevel('All'); setActiveCategory('All') }}
-              className="mt-5 px-5 py-2.5 rounded-xl font-body text-sm font-semibold text-purple-400 hover:text-white transition-all"
-              style={{ background: 'rgba(167,139,250,0.1)', border: '1px solid rgba(167,139,250,0.2)' }}>
-              Clear filters
-            </button>
-          </motion.div>
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <BookOpen size={28} className="text-slate-600 mb-4" />
+            <p className="font-bold text-white text-xl mb-2">No courses found</p>
+            <p className="text-slate-500 text-sm">Try adjusting your filters.</p>
+          </div>
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
             {filtered.map((course, i) => (
               <CourseCard key={course._id} course={course} index={i}
-                onClick={() => navigate(`/training/${course._id}`)} />
+                onClick={() => navigate(`/learning/${course._id}`)} />
             ))}
           </div>
         )}
