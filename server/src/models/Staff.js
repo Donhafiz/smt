@@ -3,7 +3,6 @@ import bcrypt from 'bcryptjs'
 import crypto from 'crypto'
 
 const staffSchema = new mongoose.Schema({
-  // Core fields (compatible with old data)
   name: { type: String },
   firstName: { type: String },
   lastName: { type: String },
@@ -15,18 +14,15 @@ const staffSchema = new mongoose.Schema({
   image: { type: String, default: '' },
   photo: { type: String, default: '' },
   
-  // Staff ID System
   staffId: { type: String, unique: true, sparse: true },
   idCardNumber: { type: String },
   idCardGenerated: { type: Boolean, default: false },
   
-  // Account
   password: { type: String },
   isActive: { type: Boolean, default: true },
   canLogin: { type: Boolean, default: false },
   lastLogin: { type: Date },
   
-  // Work
   designation: { type: String },
   employeeType: { type: String, default: 'Full-time' },
   joiningDate: { type: Date, default: Date.now },
@@ -34,34 +30,14 @@ const staffSchema = new mongoose.Schema({
   gender: { type: String },
   bio: { type: String, default: '' },
   
-  // Address
-  address: {
-    street: String,
-    city: String,
-    state: String,
-    country: { type: String, default: 'Ghana' }
-  },
+  address: { street: String, city: String, state: String, country: { type: String, default: 'Ghana' } },
+  emergencyContact: { name: String, relation: String, phone: String },
   
-  // Emergency
-  emergencyContact: {
-    name: String,
-    relation: String,
-    phone: String
-  },
-  
-  // Education
   education: [{ degree: String, institution: String, year: Number }],
   skills: [String],
   
-  // Attendance
-  attendance: [{
-    date: Date,
-    status: String,
-    checkIn: Date,
-    checkOut: Date
-  }],
+  attendance: [{ date: Date, status: String, checkIn: Date, checkOut: Date }],
   
-  // System
   tenantId: { type: String, default: 'default-tenant' }
 }, { timestamps: true })
 
@@ -75,9 +51,12 @@ staffSchema.pre('save', async function(next) {
   if (!this.idCardNumber) {
     this.idCardNumber = `SMT-ID-${this.staffId}`
   }
+  
+  // ✅ Hash password if modified
   if (this.isModified('password') && this.password) {
     this.password = await bcrypt.hash(this.password, 10)
   }
+  
   next()
 })
 
@@ -85,7 +64,6 @@ staffSchema.methods.comparePassword = async function(candidatePassword) {
   return bcrypt.compare(candidatePassword, this.password)
 }
 
-// Use existing model or create new one
 const Staff = mongoose.models.Staff || mongoose.model('Staff', staffSchema)
 
 export default Staff
