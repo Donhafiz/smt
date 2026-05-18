@@ -70,30 +70,25 @@ const contactItems = [
 // ── Back-to-top button ─────────────────────────────────────────────────────
 function BackToTop() {
   const [show, setShow] = useState(false)
+  
   useEffect(() => {
     const onScroll = () => setShow(window.scrollY > 400)
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  if (!show) return null
+
   return (
-    <AnimatePresence>
-      {show && (
-        <motion.button
-          initial={{ opacity: 0, y: 20, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 16, scale: 0.9 }}
-          transition={{ duration: 0.3, ease: [0.34, 1.56, 0.64, 1] }}
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          className="fixed bottom-8 right-8 z-50 group p-3.5 rounded-2xl text-white shadow-2xl transition-all hover:scale-110 hover:-translate-y-1"
-          style={{
-            background: 'linear-gradient(135deg, #0891b2, #2563eb)',
-            boxShadow: '0 8px 32px rgba(6,182,212,0.35)',
-          }}
-          aria-label="Back to top">
-          <ChevronUp size={20} className="transition-transform duration-300 group-hover:-translate-y-0.5" />
-        </motion.button>
-      )}
-    </AnimatePresence>
+    <button
+      onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+      className="fixed bottom-24 right-6 z-40 p-3 rounded-full bg-gradient-to-br from-cyan-500 to-blue-600 text-white shadow-2xl shadow-cyan-500/30 hover:scale-110 transition-all group"
+      aria-label="Back to top"
+    >
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="group-hover:-translate-y-0.5 transition-transform">
+        <polyline points="18 15 12 9 6 15"/>
+      </svg>
+    </button>
   )
 }
 
