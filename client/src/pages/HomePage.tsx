@@ -26,10 +26,23 @@ export default function HomePage() {
     const token = localStorage.getItem('token')
     setIsLoggedIn(!!token)
 
-    fetch('https://smt-backend-amad.onrender.com/health')
-      .then(res => res.json())
-      .then(() => setStatus('online'))
-      .catch(() => setStatus('offline'))
+    const checkHealth = async () => {
+      // Try up to 3 times with a delay
+      for (let i = 0; i < 3; i++) {
+        try {
+          const res = await fetch('https://smt-backend-amad.onrender.com/health')
+          if (res.ok) {
+            setStatus('online')
+            return
+          }
+        } catch (err) {
+          console.log(`Health check attempt ${i + 1} failed`)
+        }
+        // Wait 3 seconds between retries (Render takes ~30s to wake up)
+        await new Promise(r => setTimeout(r, 3000))
+      }
+      setStatus('offline')
+    }
 
     fetch('https://smt-backend-amad.onrender.com/api/products').then(r => r.json()).then(d => setProducts(d || [])).catch(() => {})
     fetch('https://smt-backend-amad.onrender.com/api/courses').then(r => r.json()).then(d => setCourses(d || [])).catch(() => {})
