@@ -132,12 +132,9 @@ export default function AIChatWidget() {
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
             className="fixed z-50 flex flex-col overflow-hidden
-              // Mobile: covers most of screen but not full
-              inset-x-0 bottom-0 h-[85vh] 
-              // Desktop: fixed size card
+              inset-x-0 bottom-0 h-[85vh]
               sm:inset-auto sm:bottom-6 sm:right-6 
               sm:w-[400px] sm:h-[580px] sm:max-h-[80vh]
-              // Styling
               bg-[#0a0f1e] border border-white/10 
               sm:rounded-2xl shadow-2xl"
           >
