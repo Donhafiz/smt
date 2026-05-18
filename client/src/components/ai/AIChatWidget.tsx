@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { 
   MessageCircle, X, Send, Sparkles, Bot, User,
   Zap, GraduationCap, ShoppingCart, Wrench, Lightbulb,
-  Loader2, Mic, Paperclip, Smile, MoreHorizontal,
-  ThumbsUp, ThumbsDown, Copy, Check, ArrowDown,
+  Loader2, Mic, ThumbsUp, ThumbsDown, Copy, Check, ArrowDown,
   Phone, Mail, ExternalLink
 } from 'lucide-react'
 import api from '../../lib/axios'
@@ -52,9 +51,9 @@ export default function AIChatWidget() {
   ]
 
   const quickActions = [
-    { icon: <Phone size={14} />, label: 'Call Us', action: () => window.open('tel:+233559137611') },
+    { icon: <Phone size={14} />, label: 'Call', action: () => window.open('tel:+233559137611') },
     { icon: <Mail size={14} />, label: 'Email', action: () => window.open('mailto:starmedia568@gmail.com') },
-    { icon: <ExternalLink size={14} />, label: 'Visit Site', action: () => window.open('/') },
+    { icon: <ExternalLink size={14} />, label: 'Site', action: () => window.open('/') },
   ]
 
   const handleSend = async (text?: string) => {
@@ -69,21 +68,13 @@ export default function AIChatWidget() {
 
     try {
       const res = await api.post('/ai-chat', {
-        messages: [...messages, userMessage].map(m => ({
-          role: m.role,
-          content: m.content
-        }))
+        messages: [...messages, userMessage].map(m => ({ role: m.role, content: m.content }))
       })
 
       setTimeout(() => {
         setTyping(false)
-        setMessages(prev => [...prev, {
-          role: 'assistant',
-          content: res.data.reply,
-          timestamp: new Date()
-        }])
+        setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply, timestamp: new Date() }])
       }, 800)
-
     } catch (err) {
       setTyping(false)
       setMessages(prev => [...prev, {
@@ -110,9 +101,7 @@ export default function AIChatWidget() {
   }
 
   const handleLike = (index: number) => {
-    setMessages(prev => prev.map((msg, i) => 
-      i === index ? { ...msg, liked: !msg.liked } : msg
-    ))
+    setMessages(prev => prev.map((msg, i) => i === index ? { ...msg, liked: !msg.liked } : msg))
   }
 
   return (
@@ -125,7 +114,7 @@ export default function AIChatWidget() {
             animate={{ scale: 1, rotate: 0 }}
             exit={{ scale: 0, rotate: 180 }}
             onClick={() => setIsOpen(true)}
-            className="fixed bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-2xl shadow-cyan-500/30 flex items-center justify-center hover:scale-110 transition-all group"
+            className="fixed bottom-20 sm:bottom-6 right-6 z-50 w-14 h-14 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-2xl shadow-2xl shadow-cyan-500/30 flex items-center justify-center hover:scale-110 transition-all group"
           >
             <MessageCircle size={24} className="text-white group-hover:scale-110 transition-transform" />
             <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-green-400 rounded-full border-2 border-[#020617] animate-pulse" />
@@ -134,23 +123,26 @@ export default function AIChatWidget() {
         )}
       </AnimatePresence>
 
-      {/* Chat Window */}
+      {/* Chat Window — Mobile Responsive */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ 
-              opacity: 1, 
-              scale: 1, 
-              y: 0,
-              height: isMinimized ? 'auto' : '600px'
-            }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed bottom-6 right-6 z-50 w-[380px] sm:w-[420px] bg-[#0a0f1e] border border-white/10 rounded-2xl shadow-2xl flex flex-col overflow-hidden"
+            className="fixed z-50 flex flex-col overflow-hidden
+              // Mobile: covers most of screen but not full
+              inset-x-0 bottom-0 h-[85vh] 
+              // Desktop: fixed size card
+              sm:inset-auto sm:bottom-6 sm:right-6 
+              sm:w-[400px] sm:h-[580px] sm:max-h-[80vh]
+              // Styling
+              bg-[#0a0f1e] border border-white/10 
+              sm:rounded-2xl shadow-2xl"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 p-4 flex items-center justify-between shrink-0">
+            <div className="bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 p-4 flex items-center justify-between shrink-0 sm:rounded-t-2xl">
               <div className="flex items-center gap-3">
                 <div className="relative">
                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
@@ -161,18 +153,18 @@ export default function AIChatWidget() {
                 <div>
                   <h3 className="font-bold text-white text-sm">SMT Assistant</h3>
                   <p className="text-[10px] text-white/70 flex items-center gap-1">
-                    <Sparkles size={10} /> AI-Powered • Always Online
+                    <Sparkles size={10} /> Online
                   </p>
                 </div>
               </div>
               <div className="flex items-center gap-1">
                 <button onClick={() => setIsMinimized(!isMinimized)}
-                  className="p-1.5 rounded-lg hover:bg-white/10 transition-all text-white/80">
+                  className="hidden sm:flex p-1.5 rounded-lg hover:bg-white/10 transition-all text-white/80">
                   <ArrowDown size={16} className={`transition-transform ${isMinimized ? 'rotate-180' : ''}`} />
                 </button>
                 <button onClick={() => setIsOpen(false)}
-                  className="p-1.5 rounded-lg hover:bg-white/10 transition-all text-white/80">
-                  <X size={16} />
+                  className="p-2 rounded-lg hover:bg-white/10 transition-all text-white/80">
+                  <X size={18} />
                 </button>
               </div>
             </div>
@@ -182,41 +174,27 @@ export default function AIChatWidget() {
                 {/* Messages */}
                 <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
                   {messages.map((msg, i) => (
-                    <motion.div
-                      key={i}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.1 }}
-                      className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}
-                    >
-                      {/* Avatar */}
+                    <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+                      className={`flex gap-2 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                       <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                        msg.role === 'assistant' 
-                          ? 'bg-gradient-to-br from-cyan-500 to-blue-600' 
-                          : 'bg-gradient-to-br from-purple-500 to-pink-600'
+                        msg.role === 'assistant' ? 'bg-gradient-to-br from-cyan-500 to-blue-600' : 'bg-gradient-to-br from-purple-500 to-pink-600'
                       }`}>
                         {msg.role === 'assistant' ? <Bot size={14} className="text-white" /> : <User size={14} className="text-white" />}
                       </div>
-
-                      {/* Message Bubble */}
                       <div className="group relative">
-                        <div className={`max-w-[260px] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
-                          msg.role === 'assistant'
-                            ? 'bg-white/5 text-gray-200 rounded-tl-sm'
-                            : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-tr-sm'
+                        <div className={`max-w-[240px] sm:max-w-[280px] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                          msg.role === 'assistant' ? 'bg-white/5 text-gray-200 rounded-tl-sm' : 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-tr-sm'
                         }`}>
                           {msg.content}
                         </div>
-
-                        {/* Message Actions */}
                         {msg.role === 'assistant' && (
                           <div className="flex items-center gap-1 mt-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <button onClick={() => handleCopy(msg.content, i)}
-                              className="p-1 rounded-md hover:bg-white/10 text-gray-500 hover:text-white transition-all">
+                              className="p-1 rounded-md hover:bg-white/10 text-gray-500 hover:text-white">
                               {copiedId === i ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
                             </button>
                             <button onClick={() => handleLike(i)}
-                              className={`p-1 rounded-md hover:bg-white/10 transition-all ${msg.liked ? 'text-green-400' : 'text-gray-500 hover:text-white'}`}>
+                              className={`p-1 rounded-md hover:bg-white/10 ${msg.liked ? 'text-green-400' : 'text-gray-500'}`}>
                               <ThumbsUp size={12} />
                             </button>
                           </div>
@@ -225,15 +203,14 @@ export default function AIChatWidget() {
                     </motion.div>
                   ))}
 
-                  {/* Typing Indicator */}
                   {typing && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-3">
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2">
                       <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
                         <Bot size={14} className="text-white" />
                       </div>
                       <div className="bg-white/5 px-4 py-3 rounded-2xl rounded-tl-sm">
                         <div className="flex gap-1.5">
-                          <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                          <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" />
                           <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                           <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                         </div>
@@ -274,35 +251,18 @@ export default function AIChatWidget() {
                 <div className="p-4 border-t border-white/10 shrink-0">
                   <div className="flex items-center gap-2">
                     <div className="flex-1 relative">
-                      <input
-                        ref={inputRef}
-                        type="text"
-                        value={input}
+                      <input ref={inputRef} type="text" value={input}
                         onChange={(e) => setInput(e.target.value)}
                         onKeyDown={handleKeyDown}
                         placeholder="Type your message..."
                         disabled={loading}
-                        className="w-full pl-4 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all text-sm"
-                      />
-                      <button className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-cyan-400 transition-colors">
-                        <Mic size={16} />
-                      </button>
+                        className="w-full pl-4 pr-10 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-cyan-400 transition-all text-sm" />
                     </div>
-                    <button
-                      onClick={() => handleSend()}
-                      disabled={loading || !input.trim()}
-                      className="p-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl hover:scale-105 transition-all disabled:opacity-50 disabled:hover:scale-100 shadow-lg shadow-cyan-500/20"
-                    >
-                      {loading ? (
-                        <Loader2 size={18} className="text-white animate-spin" />
-                      ) : (
-                        <Send size={18} className="text-white" />
-                      )}
+                    <button onClick={() => handleSend()} disabled={loading || !input.trim()}
+                      className="p-3 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl hover:scale-105 transition-all disabled:opacity-50 shadow-lg shadow-cyan-500/20">
+                      {loading ? <Loader2 size={18} className="text-white animate-spin" /> : <Send size={18} className="text-white" />}
                     </button>
                   </div>
-                  <p className="text-[9px] text-gray-600 text-center mt-2">
-                    Powered by AI • Star Media Tech • Tamale, Ghana
-                  </p>
                 </div>
               </>
             )}
