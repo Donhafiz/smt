@@ -1,6 +1,7 @@
 import { Routes, Route } from 'react-router-dom'
 import { AuthProvider } from './context/AuthContext'
 import { CartProvider } from './context/CartContext'
+import ScrollToTop from './components/ScrollToTop'
 
 import MainLayout from './layouts/MainLayout'
 import HomePage from './pages/HomePage'
@@ -51,6 +52,7 @@ function App() {
   return (
     <AuthProvider>
       <CartProvider>
+        <ScrollToTop />
         <Routes>
           <Route path="/" element={<MainLayout />}>
             <Route index element={<HomePage />} />
@@ -60,12 +62,12 @@ function App() {
             <Route path="contact" element={<ContactPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="register" element={<RegisterPage />} />
-            <Route path="shop" element={<ShopPage />} />  {/* Keep shop visible, but protect checkout */}
+            <Route path="shop" element={<ShopPage />} />
             <Route path="cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
             <Route path="checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
             <Route path="training" element={<TrainingPage />} />
+            <Route path="training/:id" element={<CourseDetailPage />} />
             <Route path="learning/:courseId" element={<ProtectedRoute><CoursePlayer /></ProtectedRoute>} />
-            <Route path="learning/:courseId" element={<CoursePlayer />} />
             <Route path="my-courses" element={<ProtectedRoute><MyCoursesPage /></ProtectedRoute>} />
             <Route path="consultancy" element={<ConsultancyPage />} />
             <Route path="software" element={<SoftwarePage />} />
