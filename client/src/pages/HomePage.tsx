@@ -504,28 +504,53 @@ export default function HomePage() {
             {/* Student photo cards */}
             <div className="grid md:grid-cols-3 gap-5 mb-16">
               {[
-                { name: 'Kwame A.', role: 'Cybersecurity Graduate', image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face', outcome: 'Landed a job in 3 months' },
-                { name: 'Ama S.', role: 'Web Development Student', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop&crop=face', outcome: 'Built 5 client projects' },
-                { name: 'David M.', role: 'CTO, FinServ Ghana', image: 'https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?w=400&h=400&fit=crop&crop=face', outcome: 'Saved ₵200k in costs' },
+                {
+                  name: 'Y. Habiba.',
+                  role: 'Cybersecurity Graduate',
+                  image: '/images/smtpic1.jpg',
+                  outcome: 'Landed a job in 3 months'
+                },
+                {
+                  name: 'Fawaz S.',
+                  role: 'Web Development Student',
+                  image: '/images/smtpic2.jpg',
+                  outcome: 'Built 5 client projects'
+                },
+                {
+                  name: 'Konlan J.',
+                  role: 'CTO, FinServ Ghana',
+                  image: '/images/smtpic3.jpg',
+                  outcome: 'Saved ₵200k in costs'
+                },
               ].map((p, i) => (
                 <motion.div key={i}
                   initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }} transition={{ delay: i * 0.1 }}
                   className="glass-card glass-card-hover group rounded-2xl overflow-hidden">
-                  <div className="relative h-52 overflow-hidden">
-                    <img src={p.image} alt={p.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #020617 0%, transparent 60%)' }} />
-                    <div className="absolute bottom-3 left-4 right-4">
-                      <span className="font-body text-xs px-3 py-1 rounded-full font-semibold"
-                        style={{ background: 'rgba(6,182,212,0.2)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)' }}>
+
+                  {/* Image container — fixed height, image fits inside */}
+                  <div className="relative h-48 overflow-hidden bg-gray-900">
+                    <img
+                      src={p.image}
+                      alt={p.name}
+                      className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
+                    />
+                    {/* Gradient overlay at bottom for text readability */}
+                    <div className="absolute inset-0" style={{ background: 'linear-gradient(to top, #020617 0%, transparent 50%)' }} />
+
+                    {/* Outcome badge */}
+                    <div className="absolute bottom-3 left-3 right-3">
+                      <span className="text-xs px-3 py-1.5 rounded-full font-semibold inline-block"
+                        style={{ background: 'rgba(6,182,212,0.25)', color: '#06b6d4', border: '1px solid rgba(6,182,212,0.3)', backdropFilter: 'blur(4px)' }}>
                         {p.outcome}
                       </span>
                     </div>
                   </div>
-                  <div className="p-4">
-                    <p className="font-display font-bold text-white">{p.name}</p>
-                    <p className="font-body text-sm text-slate-500">{p.role}</p>
+
+                  {/* Name & Role below image */}
+                  <div className="p-4 text-center">
+                    <h3 className="font-bold text-white">{p.name}</h3>
+                    <p className="text-sm text-gray-400">{p.role}</p>
                   </div>
                 </motion.div>
               ))}
