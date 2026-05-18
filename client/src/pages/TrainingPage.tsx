@@ -24,7 +24,7 @@ export default function TrainingPage() {
   const [selectedCategory, setSelectedCategory] = useState('All')
 
   useEffect(() => {
-    fetch('/api/courses')
+    fetch('https://smt-backend-amad.onrender.com/api/courses')
       .then(res => res.json())
       .then(data => setCourses(Array.isArray(data) ? data : []))
       .catch(() => setCourses([]))

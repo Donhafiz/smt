@@ -7,7 +7,7 @@ export default function SoftwarePage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/products')
+    fetch('https://smt-backend-amad.onrender.com/api/products')
       .then(r => r.json())
       .then(data => {
         const allProducts = Array.isArray(data) ? data : []
