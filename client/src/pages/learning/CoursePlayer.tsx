@@ -40,7 +40,7 @@ export default function CoursePlayer() {
     try {
       const [contentRes, progressRes, coursesRes] = await Promise.all([
         api.get(`/lms/course/${courseId}/content`),
-        api.get(`/lms/progress/${courseId}`),
+        api.get(`/lms/course-progress/${courseId}`),
         api.get('/courses')
       ])
 
@@ -128,7 +128,7 @@ export default function CoursePlayer() {
   }
 
   const handleLessonComplete = async (lessonId: string) => {
-    await api.put('/lms/progress', { courseId, lessonId, completed: true })
+    await api.put('/lms/course-progress', { courseId, lessonId, completed: true })
     fetchCourseData()
   }
 
