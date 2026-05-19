@@ -99,41 +99,39 @@ export default function CoursePlayer() {
   const openPaystackPopup = (coursePrice: number, userData: any) => {
     console.log('Opening Paystack with amount:', coursePrice)
 
-    try {
-      const handler = window.PaystackPop.setup({
-        key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
-        email: userData.email || 'customer@smt.com',
-        amount: Math.round(coursePrice * 100), // Convert to pesewas
-        currency: 'GHS',
-        ref: 'SMT-COURSE-' + Date.now(),
-        metadata: {
-          courseId: courseId,
-          type: 'course_enrollment'
-        },
-        callback: async function (response: any) {
-          console.log('Payment callback:', response)
-          try {
-            await api.post('/paystack/verify', { reference: response.reference })
-            await api.post('/lms/enroll', { courseId })
+    const handler = window.PaystackPop.setup({
+      key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
+      email: userData.email || 'customer@smt.com',
+      amount: Math.round(coursePrice * 100),
+      currency: 'GHS',
+      ref: 'SMT-COURSE-' + Date.now(),
+      metadata: {
+        courseId: courseId,
+        type: 'course_enrollment'
+      },
+      // ✅ Use regular function, not arrow function
+      callback: function (response: any) {
+        console.log('Payment callback:', response)
+        // Verify and enroll
+        api.post('/paystack/verify', { reference: response.reference })
+          .then(() => api.post('/lms/enroll', { courseId }))
+          .then(() => {
             fetchCourseData()
             setPaying(false)
-          } catch (err: any) {
+          })
+          .catch((err: any) => {
             console.error('Verification error:', err)
             alert('Payment successful but enrollment failed. Contact support.')
             setPaying(false)
-          }
-        },
-        onClose: function () {
-          console.log('Payment window closed')
-          setPaying(false)
-        }
-      })
-      handler.openIframe()
-    } catch (err: any) {
-      console.error('Paystack error:', err)
-      alert('Payment failed to initialize. Error: ' + (err.message || 'Unknown error'))
-      setPaying(false)
-    }
+          })
+      },
+      // ✅ Use regular function for onClose too
+      onClose: function () {
+        console.log('Payment window closed')
+        setPaying(false)
+      }
+    })
+    handler.openIframe()
   }
 
 
