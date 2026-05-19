@@ -18,6 +18,7 @@ export default function CoursePlayer() {
   const { courseId } = useParams()
   const navigate = useNavigate()
   const [content, setContent] = useState<any>(null)
+  const [coursePrice, setCoursePrice] = useState<number>(0)
   const [enrollment, setEnrollment] = useState<any>(null)
   const [activeLesson, setActiveLesson] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -37,29 +38,36 @@ export default function CoursePlayer() {
 
   const fetchCourseData = async () => {
     try {
-      const [contentRes, progressRes] = await Promise.all([
+      const [contentRes, progressRes, coursesRes] = await Promise.all([
         api.get(`/lms/course/${courseId}/content`),
-        api.get(`/lms/progress/${courseId}`)
+        api.get(`/lms/progress/${courseId}`),
+        api.get('/courses')
       ])
+
+      // ✅ Get the actual course price from the courses list
+      const allCourses = coursesRes.data || []
+      const thisCourse = allCourses.find((c: any) => c._id === courseId)
+      const price = thisCourse?.price || 2500
+      setCoursePrice(price)
+
       setContent(contentRes.data)
-      setEnrollment(progressRes.data.enrollment)
-      setPercentage(progressRes.data.percentage)
-      
+      setEnrollment(progressRes.data?.enrollment || null)
+      setPercentage(progressRes.data?.percentage || 0)
+
       const firstIncomplete = contentRes.data?.sections
         ?.flatMap((s: any) => s.lessons)
         ?.find((l: any) => {
-          const prog = progressRes.data.enrollment?.progress?.find((p: any) => p.lessonId === l._id)
+          const prog = progressRes.data?.enrollment?.progress?.find((p: any) => p.lessonId === l._id)
           return !prog?.completed
         })
       setActiveLesson(firstIncomplete || contentRes.data?.sections?.[0]?.lessons?.[0])
     } catch (err) {
-      console.error(err)
+      console.error('Fetch error:', err)
     } finally {
       setLoading(false)
     }
   }
 
-  // ✅ ENROLL WITH PAYSTACK PAYMENT
   const handleEnroll = async () => {
     const token = localStorage.getItem('token')
     if (!token) {
@@ -67,52 +75,39 @@ export default function CoursePlayer() {
       return
     }
 
-    // ✅ Get the ACTUAL course price from the course data
-    const coursePrice = content?.courseId?.price || content?.price || 2500
+    const price = coursePrice || 2500
     const userData = JSON.parse(localStorage.getItem('user') || '{}')
 
-    console.log('Course price:', coursePrice) // Debug
-
+    console.log('Course price:', price)
     setPaying(true)
 
-    // ✅ Check if Paystack is loaded
     if (typeof window.PaystackPop === 'undefined') {
-      // Load Paystack script dynamically
       const script = document.createElement('script')
       script.src = 'https://js.paystack.co/v1/inline.js'
-      script.onload = () => {
-        console.log('Paystack script loaded')
-        openPaystackPopup(coursePrice, userData)
-      }
+      script.onload = () => openPaystackPopup(price, userData)
       script.onerror = () => {
-        console.error('Failed to load Paystack script')
-        alert('Payment system unavailable. Please check your internet connection and try again.')
+        alert('Payment system unavailable. Please refresh and try again.')
         setPaying(false)
       }
       document.head.appendChild(script)
       return
     }
 
-    openPaystackPopup(coursePrice, userData)
+    openPaystackPopup(price, userData)
   }
 
-  const openPaystackPopup = (coursePrice: number, userData: any) => {
-    console.log('Opening Paystack with amount:', coursePrice)
-
+  const openPaystackPopup = (price: number, userData: any) => {
     const handler = window.PaystackPop.setup({
       key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
       email: userData.email || 'customer@smt.com',
-      amount: Math.round(coursePrice * 100),
+      amount: Math.round(price * 100),
       currency: 'GHS',
       ref: 'SMT-COURSE-' + Date.now(),
       metadata: {
         courseId: courseId,
         type: 'course_enrollment'
       },
-      // ✅ Use regular function, not arrow function
-      callback: function (response: any) {
-        console.log('Payment callback:', response)
-        // Verify and enroll
+      callback: function(response: any) {
         api.post('/paystack/verify', { reference: response.reference })
           .then(() => api.post('/lms/enroll', { courseId }))
           .then(() => {
@@ -125,15 +120,12 @@ export default function CoursePlayer() {
             setPaying(false)
           })
       },
-      // ✅ Use regular function for onClose too
-      onClose: function () {
-        console.log('Payment window closed')
+      onClose: function() {
         setPaying(false)
       }
     })
     handler.openIframe()
   }
-
 
   const handleLessonComplete = async (lessonId: string) => {
     await api.put('/lms/progress', { courseId, lessonId, completed: true })
@@ -179,11 +171,9 @@ export default function CoursePlayer() {
     )
   }
 
-  // ✅ Not enrolled — show payment enrollment screen
   // Not enrolled — show enrollment screen
   if (!enrollment) {
-    // ✅ Get price from multiple possible sources
-    const coursePrice = content?.courseId?.price || content?.price || 2500
+    const price = coursePrice || 2500
     const totalLessons = content?.sections?.reduce((sum: number, s: any) => sum + s.lessons.length, 0) || 0
 
     return (
@@ -208,10 +198,9 @@ export default function CoursePlayer() {
             </div>
           </div>
 
-          {/* ✅ Show actual course price */}
           <div className="mb-6">
             <p className="text-5xl font-black text-purple-400">
-              GHS {coursePrice?.toLocaleString()}
+              GHS {price?.toLocaleString()}
             </p>
             <p className="text-gray-500 text-sm mt-1">One-time payment · Lifetime access</p>
           </div>
@@ -224,8 +213,12 @@ export default function CoursePlayer() {
             ) : (
               <CreditCard size={20} />
             )}
-            {paying ? 'Processing...' : `Pay & Enroll — GHS ${coursePrice?.toLocaleString()}`}
+            {paying ? 'Processing...' : `Pay & Enroll — GHS ${price?.toLocaleString()}`}
           </button>
+
+          <p className="text-xs text-gray-600 mt-3 flex items-center justify-center gap-1">
+            <Shield size={10} className="text-green-400" /> Secure payment via Paystack
+          </p>
         </div>
       </div>
     )
@@ -233,7 +226,6 @@ export default function CoursePlayer() {
 
   return (
     <div className="min-h-screen bg-[#020617] text-white flex">
-      {/* Sidebar — Lesson List */}
       <div className="w-80 bg-[#0f172a] border-r border-white/10 h-screen overflow-y-auto flex-shrink-0 hidden lg:block">
         <div className="p-5 border-b border-white/10">
           <button onClick={() => navigate('/my-courses')} className="flex items-center gap-2 text-sm text-gray-400 hover:text-white mb-4">
@@ -254,7 +246,6 @@ export default function CoursePlayer() {
                 const prog = enrollment?.progress?.find((p: any) => p.lessonId === lesson._id)
                 const isActive = activeLesson?._id === lesson._id
                 const isCompleted = prog?.completed
-
                 return (
                   <button key={li} onClick={() => setActiveLesson(lesson)}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-1 ${
@@ -270,7 +261,6 @@ export default function CoursePlayer() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="flex-1 overflow-y-auto">
         <div className="bg-black aspect-video flex items-center justify-center">
           {activeLesson?.videoUrl ? (
@@ -285,9 +275,7 @@ export default function CoursePlayer() {
 
         <div className="max-w-4xl mx-auto p-6">
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">{activeLesson?.title || 'Select a Lesson'}</h1>
-            </div>
+            <div><h1 className="text-2xl font-bold">{activeLesson?.title || 'Select a Lesson'}</h1></div>
             {activeLesson && (
               <button onClick={() => handleLessonComplete(activeLesson._id)}
                 className="px-6 py-3 bg-green-500 hover:bg-green-600 rounded-xl font-semibold flex items-center gap-2 transition-all">
