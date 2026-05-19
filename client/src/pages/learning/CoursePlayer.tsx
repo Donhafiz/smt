@@ -61,72 +61,82 @@ export default function CoursePlayer() {
 
   // ✅ ENROLL WITH PAYSTACK PAYMENT
   const handleEnroll = async () => {
-  const token = localStorage.getItem('token')
-  if (!token) {
-    navigate('/login')
-    return
-  }
-
-  const coursePrice = content?.courseId?.price || 2500
-  const userData = JSON.parse(localStorage.getItem('user') || '{}')
-
-  // ✅ Check if Paystack is available — if not, load it dynamically
-  if (typeof window.PaystackPop === 'undefined') {
-    // Load Paystack script dynamically
-    const script = document.createElement('script')
-    script.src = 'https://js.paystack.co/v1/inline.js'
-    script.onload = () => {
-      // Script loaded, now try payment again
-      openPaystackPopup(coursePrice, userData)
+    const token = localStorage.getItem('token')
+    if (!token) {
+      navigate('/login')
+      return
     }
-    script.onerror = () => {
-      alert('Payment system is unavailable. Please refresh the page and try again.')
-      setPaying(false)
-    }
-    document.head.appendChild(script)
-    return
-  }
 
-  openPaystackPopup(coursePrice, userData)
-}
+    // ✅ Get the ACTUAL course price from the course data
+    const coursePrice = content?.courseId?.price || content?.price || 2500
+    const userData = JSON.parse(localStorage.getItem('user') || '{}')
 
-// Separate function for opening Paystack
-const openPaystackPopup = (coursePrice: number, userData: any) => {
-  setPaying(true)
-  
-  try {
-    const handler = window.PaystackPop.setup({
-      key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
-      email: userData.email || 'customer@smt.com',
-      amount: Math.round(coursePrice * 100),
-      currency: 'GHS',
-      ref: 'SMT-COURSE-' + Date.now(),
-      metadata: {
-        courseId: courseId,
-        type: 'course_enrollment'
-      },
-      callback: async function(response: any) {
-        try {
-          await api.post('/paystack/verify', { reference: response.reference })
-          await api.post('/lms/enroll', { courseId })
-          fetchCourseData()
-          setPaying(false)
-        } catch (err: any) {
-          alert('Payment verified but enrollment failed. Contact support.')
-          setPaying(false)
-        }
-      },
-      onClose: function() {
+    console.log('Course price:', coursePrice) // Debug
+
+    setPaying(true)
+
+    // ✅ Check if Paystack is loaded
+    if (typeof window.PaystackPop === 'undefined') {
+      // Load Paystack script dynamically
+      const script = document.createElement('script')
+      script.src = 'https://js.paystack.co/v1/inline.js'
+      script.onload = () => {
+        console.log('Paystack script loaded')
+        openPaystackPopup(coursePrice, userData)
+      }
+      script.onerror = () => {
+        console.error('Failed to load Paystack script')
+        alert('Payment system unavailable. Please check your internet connection and try again.')
         setPaying(false)
       }
-    })
-    handler.openIframe()
-  } catch (err: any) {
-    console.error('Paystack error:', err)
-    alert('Payment failed to initialize. Please try again.')
-    setPaying(false)
+      document.head.appendChild(script)
+      return
+    }
+
+    openPaystackPopup(coursePrice, userData)
   }
-}
+
+  const openPaystackPopup = (coursePrice: number, userData: any) => {
+    console.log('Opening Paystack with amount:', coursePrice)
+
+    try {
+      const handler = window.PaystackPop.setup({
+        key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
+        email: userData.email || 'customer@smt.com',
+        amount: Math.round(coursePrice * 100), // Convert to pesewas
+        currency: 'GHS',
+        ref: 'SMT-COURSE-' + Date.now(),
+        metadata: {
+          courseId: courseId,
+          type: 'course_enrollment'
+        },
+        callback: async function (response: any) {
+          console.log('Payment callback:', response)
+          try {
+            await api.post('/paystack/verify', { reference: response.reference })
+            await api.post('/lms/enroll', { courseId })
+            fetchCourseData()
+            setPaying(false)
+          } catch (err: any) {
+            console.error('Verification error:', err)
+            alert('Payment successful but enrollment failed. Contact support.')
+            setPaying(false)
+          }
+        },
+        onClose: function () {
+          console.log('Payment window closed')
+          setPaying(false)
+        }
+      })
+      handler.openIframe()
+    } catch (err: any) {
+      console.error('Paystack error:', err)
+      alert('Payment failed to initialize. Error: ' + (err.message || 'Unknown error'))
+      setPaying(false)
+    }
+  }
+
+
   const handleLessonComplete = async (lessonId: string) => {
     await api.put('/lms/progress', { courseId, lessonId, completed: true })
     fetchCourseData()
@@ -172,8 +182,10 @@ const openPaystackPopup = (coursePrice: number, userData: any) => {
   }
 
   // ✅ Not enrolled — show payment enrollment screen
+  // Not enrolled — show enrollment screen
   if (!enrollment) {
-    const coursePrice = content?.courseId?.price || 2500
+    // ✅ Get price from multiple possible sources
+    const coursePrice = content?.courseId?.price || content?.price || 2500
     const totalLessons = content?.sections?.reduce((sum: number, s: any) => sum + s.lessons.length, 0) || 0
 
     return (
@@ -181,37 +193,31 @@ const openPaystackPopup = (coursePrice: number, userData: any) => {
         <div className="text-center max-w-md">
           <BookOpen size={64} className="mx-auto text-purple-400 mb-6" />
           <h1 className="text-3xl font-black mb-4">Enroll to Start Learning</h1>
-          <p className="text-gray-400 mb-8">Get access to all course materials, videos, and earn your certificate upon completion.</p>
-          
-          {/* Course Details Card */}
+          <p className="text-gray-400 mb-8">Get access to all course materials, videos, and earn your certificate.</p>
+
           <div className="bg-white/5 rounded-2xl p-6 mb-6 text-left">
             <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-gray-400 flex items-center gap-2"><BookOpen size={14} /> Total Lessons</span>
+              <span className="text-gray-400">Total Lessons</span>
               <span className="text-white font-bold">{totalLessons}</span>
             </div>
             <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-gray-400 flex items-center gap-2"><Award size={14} /> Certificate</span>
+              <span className="text-gray-400">Certificate</span>
               <span className="text-green-400 font-bold">Yes, upon completion</span>
             </div>
-            <div className="flex items-center justify-between text-sm mb-3">
-              <span className="text-gray-400 flex items-center gap-2"><Clock size={14} /> Duration</span>
-              <span className="text-white font-bold">{content?.sections?.length || 0} sections</span>
-            </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-400 flex items-center gap-2"><Users size={14} /> Access</span>
+              <span className="text-gray-400">Access</span>
               <span className="text-white font-bold">Lifetime</span>
             </div>
           </div>
 
-          {/* Price */}
+          {/* ✅ Show actual course price */}
           <div className="mb-6">
             <p className="text-5xl font-black text-purple-400">
               GHS {coursePrice?.toLocaleString()}
             </p>
-            <p className="text-gray-500 text-sm mt-1">One-time payment · Lifetime access · Certificate included</p>
+            <p className="text-gray-500 text-sm mt-1">One-time payment · Lifetime access</p>
           </div>
 
-          {/* Pay Button */}
           <button onClick={handleEnroll} disabled={paying}
             className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl font-semibold text-lg hover:scale-105 transition-all shadow-xl w-full flex items-center justify-center gap-2 disabled:opacity-50">
             {paying ? (
@@ -220,12 +226,8 @@ const openPaystackPopup = (coursePrice: number, userData: any) => {
             ) : (
               <CreditCard size={20} />
             )}
-            {paying ? 'Processing Payment...' : `Pay & Enroll — GHS ${coursePrice?.toLocaleString()}`}
+            {paying ? 'Processing...' : `Pay & Enroll — GHS ${coursePrice?.toLocaleString()}`}
           </button>
-
-          <p className="text-xs text-gray-600 mt-3 flex items-center justify-center gap-1">
-            <Shield size={10} className="text-green-400" /> Secure payment via Paystack · 7-day refund guarantee
-          </p>
         </div>
       </div>
     )
