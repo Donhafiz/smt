@@ -4,8 +4,15 @@ import { motion } from 'framer-motion'
 import api from '../../lib/axios'
 import {
   Play, CheckCircle2, Clock, BookOpen, ChevronRight,
-  Award, Download, Lock, ArrowLeft, Trophy, Shield
+  Award, Download, Lock, ArrowLeft, Trophy, Shield,
+  CreditCard, Users
 } from 'lucide-react'
+
+declare global {
+  interface Window {
+    PaystackPop: any
+  }
+}
 
 export default function CoursePlayer() {
   const { courseId } = useParams()
@@ -16,6 +23,7 @@ export default function CoursePlayer() {
   const [loading, setLoading] = useState(true)
   const [percentage, setPercentage] = useState(0)
   const [needsAuth, setNeedsAuth] = useState(false)
+  const [paying, setPaying] = useState(false)
 
   useEffect(() => {
     const token = localStorage.getItem('token')
@@ -51,20 +59,59 @@ export default function CoursePlayer() {
     }
   }
 
+  // ✅ ENROLL WITH PAYSTACK PAYMENT
   const handleEnroll = async () => {
-    const token = localStorage.getItem('token')
-    if (!token) {
-      navigate('/login')
-      return
-    }
-    try {
-      await api.post('/lms/enroll', { courseId })
-      fetchCourseData()
-    } catch (err: any) {
-      alert(err?.response?.data?.message || 'Please log in to enroll')
-    }
+  const token = localStorage.getItem('token')
+  if (!token) {
+    navigate('/login')
+    return
   }
 
+  const coursePrice = content?.courseId?.price || 2500
+  const userData = JSON.parse(localStorage.getItem('user') || '{}')
+  
+  // ✅ Check if Paystack is loaded
+  if (!window.PaystackPop) {
+    alert('Payment system is loading. Please refresh the page and try again.')
+    return
+  }
+
+  setPaying(true)
+
+  try {
+    const handler = window.PaystackPop.setup({
+      key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
+      email: userData.email || 'customer@smt.com',
+      amount: Math.round(coursePrice * 100),
+      currency: 'GHS',
+      ref: 'SMT-COURSE-' + Date.now(),
+      metadata: {
+        courseId: courseId,
+        type: 'course_enrollment'
+      },
+      callback: async function(response: any) {
+        try {
+          // Verify payment
+          await api.post('/paystack/verify', { reference: response.reference })
+          // Enroll after successful payment
+          await api.post('/lms/enroll', { courseId })
+          fetchCourseData()
+          setPaying(false)
+        } catch (err: any) {
+          alert('Payment verified but enrollment failed. Contact support.')
+          setPaying(false)
+        }
+      },
+      onClose: function() {
+        setPaying(false)
+      }
+    })
+    handler.openIframe()
+  } catch (err: any) {
+    alert('Payment failed to initialize. Please try again.')
+    setPaying(false)
+  }
+}
   const handleLessonComplete = async (lessonId: string) => {
     await api.put('/lms/progress', { courseId, lessonId, completed: true })
     fetchCourseData()
@@ -79,7 +126,6 @@ export default function CoursePlayer() {
     }
   }
 
-  // 🔒 Not logged in
   if (needsAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white px-6">
@@ -110,32 +156,61 @@ export default function CoursePlayer() {
     )
   }
 
-  // Not enrolled — show enrollment screen
+  // ✅ Not enrolled — show payment enrollment screen
   if (!enrollment) {
+    const coursePrice = content?.courseId?.price || 2500
+    const totalLessons = content?.sections?.reduce((sum: number, s: any) => sum + s.lessons.length, 0) || 0
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#020617] text-white px-6">
         <div className="text-center max-w-md">
           <BookOpen size={64} className="mx-auto text-purple-400 mb-6" />
           <h1 className="text-3xl font-black mb-4">Enroll to Start Learning</h1>
           <p className="text-gray-400 mb-8">Get access to all course materials, videos, and earn your certificate upon completion.</p>
-          <div className="bg-white/5 rounded-2xl p-6 mb-8">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-gray-400">Total Lessons</span>
-              <span className="text-white font-bold">{content?.sections?.reduce((sum: number, s: any) => sum + s.lessons.length, 0) || 0}</span>
+          
+          {/* Course Details Card */}
+          <div className="bg-white/5 rounded-2xl p-6 mb-6 text-left">
+            <div className="flex items-center justify-between text-sm mb-3">
+              <span className="text-gray-400 flex items-center gap-2"><BookOpen size={14} /> Total Lessons</span>
+              <span className="text-white font-bold">{totalLessons}</span>
             </div>
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-gray-400">Certificate</span>
+            <div className="flex items-center justify-between text-sm mb-3">
+              <span className="text-gray-400 flex items-center gap-2"><Award size={14} /> Certificate</span>
               <span className="text-green-400 font-bold">Yes, upon completion</span>
             </div>
+            <div className="flex items-center justify-between text-sm mb-3">
+              <span className="text-gray-400 flex items-center gap-2"><Clock size={14} /> Duration</span>
+              <span className="text-white font-bold">{content?.sections?.length || 0} sections</span>
+            </div>
             <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-400">Access</span>
+              <span className="text-gray-400 flex items-center gap-2"><Users size={14} /> Access</span>
               <span className="text-white font-bold">Lifetime</span>
             </div>
           </div>
-          <button onClick={handleEnroll}
-            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl font-semibold text-lg hover:scale-105 transition-all shadow-xl w-full">
-            Enroll Now — Start Learning
+
+          {/* Price */}
+          <div className="mb-6">
+            <p className="text-5xl font-black text-purple-400">
+              GHS {coursePrice?.toLocaleString()}
+            </p>
+            <p className="text-gray-500 text-sm mt-1">One-time payment · Lifetime access · Certificate included</p>
+          </div>
+
+          {/* Pay Button */}
+          <button onClick={handleEnroll} disabled={paying}
+            className="px-8 py-4 bg-gradient-to-r from-purple-500 to-pink-600 rounded-2xl font-semibold text-lg hover:scale-105 transition-all shadow-xl w-full flex items-center justify-center gap-2 disabled:opacity-50">
+            {paying ? (
+              <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.8, repeat: Infinity, ease: 'linear' }}
+                className="w-5 h-5 rounded-full border-2 border-white/30 border-t-white" />
+            ) : (
+              <CreditCard size={20} />
+            )}
+            {paying ? 'Processing Payment...' : `Pay & Enroll — GHS ${coursePrice?.toLocaleString()}`}
           </button>
+
+          <p className="text-xs text-gray-600 mt-3 flex items-center justify-center gap-1">
+            <Shield size={10} className="text-green-400" /> Secure payment via Paystack · 7-day refund guarantee
+          </p>
         </div>
       </div>
     )

@@ -3,17 +3,24 @@ import mongoose from 'mongoose'
 const lessonSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
-  videoUrl: { type: String, required: true }, // YouTube, Vimeo, or direct URL
-  duration: { type: Number }, // in minutes
+  videoUrl: { type: String, required: true },
+  duration: { type: Number },
   order: { type: Number },
-  isPreview: { type: Boolean, default: false } // Free preview lesson
-})
-
-const sectionSchema = new mongoose.Schema({
-  title: { type: String, required: true },
-  lessons: [lessonSchema]
-})
-
+  isPreview: { type: Boolean, default: false },
+  // ✅ NEW: Assignment
+  assignment: {
+    title: { type: String },
+    description: { type: String },
+    dueDate: { type: Date },
+    questions: [{
+      question: String,
+      options: [String],
+      correctAnswer: Number // Index of correct option
+    }],
+    passingScore: { type: Number, default: 70 }
+  }
+},
+{ timestamps: true })
 const courseContentSchema = new mongoose.Schema({
   courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
   sections: [sectionSchema],

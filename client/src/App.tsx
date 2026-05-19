@@ -47,6 +47,7 @@ import NotFoundPage from './pages/NotFoundPage'
 import CourseDetailPage from './pages/CourseDetailPage'
 import CoursePlayer from './pages/learning/CoursePlayer'
 import MyCoursesPage from './pages/learning/MyCoursesPage'
+import MyAccountPage from './pages/account/MyAccountPage'
 
 function App() {
   return (
@@ -91,6 +92,7 @@ function App() {
             <Route path="cookies" element={<CookiesPage />} />
             <Route path="refunds" element={<RefundsPage />} />
             <Route path="staff-login" element={<StaffLoginPage />} />
+            <Route path="my-account" element={<ProtectedRoute><MyAccountPage /></ProtectedRoute>} />
           </Route>
 
           <Route path="/staff-portal" element={<StaffPortalLayout />}>

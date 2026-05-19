@@ -47,10 +47,10 @@ export default function CheckoutPage() {
     return Object.keys(newErrors).length === 0
   }
 
-  // ✅ REAL PAYSTACK PAYMENT
   const handlePaystackPayment = () => {
-    if (!validateShipping()) {
-      setStep(1)
+    if (!window.PaystackPop) {
+      alert('Payment system is loading. Please refresh and try again.')
+      setLoading(false)
       return
     }
 
