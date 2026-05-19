@@ -7,7 +7,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['pwa-192.png', 'pwa-512.png', 'smt-logo.png'],
+      includeAssets: ['smt-logo.png'],
       manifest: {
         name: 'Star Media Tech',
         short_name: 'SMT',
@@ -21,9 +21,9 @@ export default defineConfig({
         lang: 'en',
         categories: ['education', 'technology', 'business', 'shopping'],
         icons: [
-          { src: 'pwa-192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+          { src: 'smt-logo.png', sizes: '192x192', type: 'image/png' },
+          { src: 'smt-logo.png', sizes: '512x512', type: 'image/png' },
+          { src: 'smt-logo.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }
         ]
       },
       workbox: {
