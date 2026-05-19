@@ -48,7 +48,7 @@ import CourseDetailPage from './pages/CourseDetailPage'
 import CoursePlayer from './pages/learning/CoursePlayer'
 import MyCoursesPage from './pages/learning/MyCoursesPage'
 import MyAccountPage from './pages/account/MyAccountPage'
-
+import BlogPage from './pages/BlogPage'
 function App() {
   return (
     <AuthProvider>
@@ -86,6 +86,7 @@ function App() {
             <Route path="partners" element={<PartnersPage />} />
             <Route path="help" element={<HelpCenterPage />} />
             <Route path="faqs" element={<FAQPage />} />
+            <Route path="blog" element={<BlogPage />} />
             <Route path="shipping" element={<ShippingPage />} />
             <Route path="privacy" element={<PrivacyPage />} />
             <Route path="terms" element={<TermsPage />} />
