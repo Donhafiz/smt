@@ -38,36 +38,50 @@ export default function CoursePlayer() {
 
   const fetchCourseData = async () => {
     try {
-      const [contentRes, progressRes, coursesRes] = await Promise.all([
+      const [contentRes, coursesRes, myCoursesRes] = await Promise.all([
         api.get(`/lms/course/${courseId}/content`),
-        api.get(`/lms/course-progress/${courseId}`),
-        api.get('/courses')
+        api.get('/courses'),
+        api.get('/lms/my-courses')
       ])
 
-      // ✅ Get the actual course price from the courses list
+      // Get course price
       const allCourses = coursesRes.data || []
       const thisCourse = allCourses.find((c: any) => c._id === courseId)
-      const price = thisCourse?.price || 2500
-      setCoursePrice(price)
-
+      setCoursePrice(thisCourse?.price || 2500)
       setContent(contentRes.data)
-      setEnrollment(progressRes.data?.enrollment || null)
-      setPercentage(progressRes.data?.percentage || 0)
 
-      const firstIncomplete = contentRes.data?.sections
-        ?.flatMap((s: any) => s.lessons)
-        ?.find((l: any) => {
-          const prog = progressRes.data?.enrollment?.progress?.find((p: any) => p.lessonId === l._id)
-          return !prog?.completed
-        })
-      setActiveLesson(firstIncomplete || contentRes.data?.sections?.[0]?.lessons?.[0])
+      // ✅ Check enrollment from my-courses instead of progress endpoint
+      const myCourses = myCoursesRes.data || []
+      const currentEnrollment = myCourses.find((e: any) => e.courseId?._id === courseId)
+
+      if (currentEnrollment) {
+        setEnrollment(currentEnrollment)
+
+        // Calculate percentage from enrollment progress
+        const totalLessons = contentRes.data?.sections?.reduce((sum: number, s: any) => sum + s.lessons.length, 0) || 0
+        const completedLessons = currentEnrollment.progress?.filter((p: any) => p.completed).length || 0
+        const pct = totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0
+        setPercentage(pct)
+
+        // Find first incomplete lesson
+        const firstIncomplete = contentRes.data?.sections
+          ?.flatMap((s: any) => s.lessons)
+          ?.find((l: any) => {
+            const prog = currentEnrollment.progress?.find((p: any) => p.lessonId === l._id)
+            return !prog?.completed
+          })
+        setActiveLesson(firstIncomplete || contentRes.data?.sections?.[0]?.lessons?.[0])
+      } else {
+        setEnrollment(null)
+        setPercentage(0)
+        setActiveLesson(contentRes.data?.sections?.[0]?.lessons?.[0])
+      }
     } catch (err) {
       console.error('Fetch error:', err)
     } finally {
       setLoading(false)
     }
   }
-
   const handleEnroll = async () => {
     const token = localStorage.getItem('token')
     if (!token) {
@@ -107,7 +121,7 @@ export default function CoursePlayer() {
         courseId: courseId,
         type: 'course_enrollment'
       },
-      callback: function(response: any) {
+      callback: function (response: any) {
         api.post('/paystack/verify', { reference: response.reference })
           .then(() => api.post('/lms/enroll', { courseId }))
           .then(() => {
@@ -120,7 +134,7 @@ export default function CoursePlayer() {
             setPaying(false)
           })
       },
-      onClose: function() {
+      onClose: function () {
         setPaying(false)
       }
     })
@@ -128,8 +142,8 @@ export default function CoursePlayer() {
   }
 
   const handleLessonComplete = async (lessonId: string) => {
-    await api.put('/lms/course-progress', { courseId, lessonId, completed: true })
-    fetchCourseData()
+    await api.put('/lms/progress', { courseId, lessonId, completed: true })
+    fetchCourseData() // Refresh from my-courses
   }
 
   const handleGenerateCertificate = async () => {
@@ -248,9 +262,8 @@ export default function CoursePlayer() {
                 const isCompleted = prog?.completed
                 return (
                   <button key={li} onClick={() => setActiveLesson(lesson)}
-                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-1 ${
-                      isActive ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}>
+                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all mb-1 ${isActive ? 'bg-purple-500/20 text-purple-400' : 'text-gray-400 hover:text-white hover:bg-white/5'
+                      }`}>
                     {isCompleted ? <CheckCircle2 size={14} className="text-green-400 flex-shrink-0" /> : <Play size={14} className="flex-shrink-0" />}
                     <span className="truncate text-left">{lesson.title}</span>
                   </button>
