@@ -1,5 +1,19 @@
 import mongoose from 'mongoose'
 
+const questionSchema = new mongoose.Schema({
+  question: String,
+  options: [String],
+  correctAnswer: Number
+})
+
+const assignmentSchema = new mongoose.Schema({
+  title: { type: String },
+  description: { type: String },
+  dueDate: { type: Date },
+  questions: [questionSchema],
+  passingScore: { type: Number, default: 70 }
+})
+
 const lessonSchema = new mongoose.Schema({
   title: { type: String, required: true },
   description: { type: String },
@@ -7,28 +21,22 @@ const lessonSchema = new mongoose.Schema({
   duration: { type: Number },
   order: { type: Number },
   isPreview: { type: Boolean, default: false },
-  // ✅ NEW: Assignment
-  assignment: {
-    title: { type: String },
-    description: { type: String },
-    dueDate: { type: Date },
-    questions: [{
-      question: String,
-      options: [String],
-      correctAnswer: Number // Index of correct option
-    }],
-    passingScore: { type: Number, default: 70 }
-  }
-},
-{ timestamps: true })
+  assignment: assignmentSchema
+})
+
+const sectionSchema = new mongoose.Schema({
+  title: { type: String, required: true },
+  lessons: [lessonSchema]
+})
+
 const courseContentSchema = new mongoose.Schema({
   courseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Course', required: true },
   sections: [sectionSchema],
-  totalDuration: { type: Number }, // Total hours
+  totalDuration: { type: Number },
   totalLessons: { type: Number },
   thumbnail: { type: String },
-  trailerUrl: { type: String }, // Course preview video
-  requirements: [String], // Prerequisites
+  trailerUrl: { type: String },
+  requirements: [String],
   whatYouWillLearn: [String],
   instructor: {
     name: String,
