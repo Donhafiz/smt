@@ -48,54 +48,87 @@ export default function CheckoutPage() {
   }
 
   const handlePaystackPayment = () => {
-    if (!window.PaystackPop) {
-      alert('Payment system is loading. Please refresh and try again.')
-      setLoading(false)
+    // ✅ Dynamically load Paystack if not available
+    if (typeof window.PaystackPop === 'undefined') {
+      setLoading(true)
+      const script = document.createElement('script')
+      script.src = 'https://js.paystack.co/v1/inline.js'
+      script.onload = () => {
+        openPaystackPopup()
+      }
+      script.onerror = () => {
+        alert('Payment system is unavailable. Please refresh the page and try again.')
+        setLoading(false)
+      }
+      document.head.appendChild(script)
       return
     }
 
-    const handler = window.PaystackPop.setup({
-      key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
-      email: form.email,
-      amount: finalTotal * 100,
-      currency: 'GHS',
-      ref: 'SMT-' + Date.now(),
-      metadata: {
-        custom_fields: [
-          { display_name: 'Customer Name', variable_name: 'customer_name', value: `${form.firstName} ${form.lastName}` },
-          { display_name: 'Phone', variable_name: 'phone', value: form.phone },
-          { display_name: 'Address', variable_name: 'address', value: `${form.address}, ${form.city}, ${form.region}` }
-        ]
-      },
-      callback: async function(response: any) {
-        try {
-          await api.post('/paystack/verify', { reference: response.reference })
-          await api.post('/orders', {
-            customerName: `${form.firstName} ${form.lastName}`,
-            customerEmail: form.email,
-            phone: form.phone,
-            address: form.address,
-            city: form.city,
-            region: form.region,
-            items: items.map((i: any) => ({ productId: i.product?._id, name: i.product?.name, price: i.product?.price, quantity: i.quantity })),
-            total: finalTotal,
-            deliveryMethod: form.deliveryMethod,
-            paymentReference: response.reference,
-            paymentMethod: form.paymentMethod,
-            status: 'completed'
-          })
-          clearCart()
-          navigate('/payment-success')
-        } catch (err) {
-          alert('Payment verification failed. Contact support.')
+    openPaystackPopup()
+  }
+
+  // ✅ Separate function for opening Paystack popup
+  const openPaystackPopup = () => {
+    setLoading(true)
+
+    try {
+      const handler = window.PaystackPop.setup({
+        key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
+        email: form.email || 'customer@smt.com',
+        amount: Math.round(finalTotal * 100),
+        currency: 'GHS',
+        ref: 'SMT-' + Date.now(),
+        metadata: {
+          custom_fields: [
+            { display_name: 'Customer Name', variable_name: 'customer_name', value: `${form.firstName} ${form.lastName}` },
+            { display_name: 'Phone', variable_name: 'phone', value: form.phone },
+            { display_name: 'Address', variable_name: 'address', value: `${form.address}, ${form.city}, ${form.region}` }
+          ]
+        },
+        callback: async function (response: any) {
+          try {
+            // Verify payment on backend
+            await api.post('/paystack/verify', { reference: response.reference })
+
+            // Save order to database
+            await api.post('/orders', {
+              customerName: `${form.firstName} ${form.lastName}`,
+              customerEmail: form.email,
+              phone: form.phone,
+              address: form.address,
+              city: form.city,
+              region: form.region,
+              items: items.map((i: any) => ({
+                productId: i.product?._id,
+                name: i.product?.name,
+                price: i.product?.price,
+                quantity: i.quantity
+              })),
+              total: finalTotal,
+              deliveryMethod: form.deliveryMethod,
+              paymentReference: response.reference,
+              paymentMethod: form.paymentMethod,
+              status: 'completed'
+            })
+
+            clearCart()
+            navigate('/payment-success')
+          } catch (err: any) {
+            console.error('Payment verification error:', err)
+            alert('Payment was successful but verification failed. Please contact support with reference: ' + response.reference)
+            setLoading(false)
+          }
+        },
+        onClose: function () {
           setLoading(false)
         }
-      },
-      onClose: function() {
-        setLoading(false)
-      }
-    })
-    handler.openIframe()
+      })
+      handler.openIframe()
+    } catch (err: any) {
+      console.error('Paystack setup error:', err)
+      alert('Payment failed to initialize. Please try again or use a different payment method.')
+      setLoading(false)
+    }
   }
 
   // ✅ MOBILE MONEY PAYMENT
@@ -104,6 +137,7 @@ export default function CheckoutPage() {
       setStep(1)
       return
     }
+    setLoading(true)
     try {
       const res = await api.post('/paystack/initialize', {
         email: form.email,
@@ -117,13 +151,16 @@ export default function CheckoutPage() {
       })
       if (res.data?.data?.authorization_url) {
         window.location.href = res.data.data.authorization_url
+      } else {
+        alert('Payment initialization failed. Please try again.')
+        setLoading(false)
       }
-    } catch (err) {
-      alert('Payment initialization failed. Please try again.')
+    } catch (err: any) {
+      console.error('Mobile money error:', err)
+      alert('Mobile money payment failed. Please try card payment instead.')
       setLoading(false)
     }
   }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)

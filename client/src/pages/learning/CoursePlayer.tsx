@@ -69,15 +69,31 @@ export default function CoursePlayer() {
 
   const coursePrice = content?.courseId?.price || 2500
   const userData = JSON.parse(localStorage.getItem('user') || '{}')
-  
-  // ✅ Check if Paystack is loaded
-  if (!window.PaystackPop) {
-    alert('Payment system is loading. Please refresh the page and try again.')
+
+  // ✅ Check if Paystack is available — if not, load it dynamically
+  if (typeof window.PaystackPop === 'undefined') {
+    // Load Paystack script dynamically
+    const script = document.createElement('script')
+    script.src = 'https://js.paystack.co/v1/inline.js'
+    script.onload = () => {
+      // Script loaded, now try payment again
+      openPaystackPopup(coursePrice, userData)
+    }
+    script.onerror = () => {
+      alert('Payment system is unavailable. Please refresh the page and try again.')
+      setPaying(false)
+    }
+    document.head.appendChild(script)
     return
   }
 
-  setPaying(true)
+  openPaystackPopup(coursePrice, userData)
+}
 
+// Separate function for opening Paystack
+const openPaystackPopup = (coursePrice: number, userData: any) => {
+  setPaying(true)
+  
   try {
     const handler = window.PaystackPop.setup({
       key: 'pk_live_f494a9f7aa60622b8212549908a6f8dd8ab691c8',
@@ -91,9 +107,7 @@ export default function CoursePlayer() {
       },
       callback: async function(response: any) {
         try {
-          // Verify payment
           await api.post('/paystack/verify', { reference: response.reference })
-          // Enroll after successful payment
           await api.post('/lms/enroll', { courseId })
           fetchCourseData()
           setPaying(false)
@@ -108,6 +122,7 @@ export default function CoursePlayer() {
     })
     handler.openIframe()
   } catch (err: any) {
+    console.error('Paystack error:', err)
     alert('Payment failed to initialize. Please try again.')
     setPaying(false)
   }
